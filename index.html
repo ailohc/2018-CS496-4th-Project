@@ -117,13 +117,20 @@
 								function code_to_server(codestring, class_name) {
 									var codeJSON = {"classname" : class_name, "code" : codestring};
 									var codestring = JSON.stringify(codeJSON);
-									console.log(codestring); 
+									//console.log(codestring); 
 									var xhr = new XMLHttpRequest();
 									xhr.open("POST", 'http://52.231.65.108:8080/api/run', true);
 									xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
 									xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
 									xhr.setRequestHeader("Content-Type", "application/json");
 									xhr.send(codestring);
+									xhr.onreadystatechange = function() {
+										if (xhr.readyState == XMLHttpRequest.DONE) {
+											var result_string = xhr.response; 
+											console.log(result_string);
+											document.result_form.result_text.value += result_string;
+										}
+									}	
 								}
 							  </script>
 			</div>
