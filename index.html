@@ -19,7 +19,12 @@
 		<script src="mode/clike/clike.js"></script>
 		<script src="addon/edit/matchbrackets.js"></script>
 		<script src="addon/edit/closebrackets.js"></script>
-		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+		<script src="addon/dialog/dialog.js"></script>
+		<script src="addon/search/searchcursor.js"></script>
+		<script src="addon/search/search.js"></script>
+		<script src="addon/scroll/annotatescrollbar.js"></script>
+		<script src="addon/search/matchesonscrollbar.js"></script>
+		<script src="addon/search/jump-to-line.js"></script>
 		<!-- Wrapper -->
 			<div id="wrapper">
 
@@ -95,29 +100,31 @@
 					<div id="main">
 						<form name = "code_form"><textarea id="code_text"></textarea></form>
 							<button type="button" onclick="save_to_server();">Save</button>
-							<button type="button" onclick="btn_js_prompt_click();">Compile</button>
-							<form name = "result_form" style="margin-top: 3em;"><textarea id="result_text" name ="result_text"></textarea></form>
+							<button type="button" onclick="btn_run_click();">Run</button>
+							<form name = "std_inform"><textarea item-width="10dp" id="std_in" name = "std_in"></textarea></form>
+							<form name = "result_form" style="margin-top: 3em;"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
 							  <script>
 								var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
 									matchBrackets: true,
 									autoCloseBrackets: true,
         							theme: "yeti",
-        							mode: "text/x-scala"
+									mode: "text/x-scala" 
 								});
-								function btn_js_prompt_click(){
+								function btn_run_click(){
+										var std_input = document.std_inform.std_in.value;
 										var codestring = editor.getValue();
 										var class_name = prompt("Please Write your Class Name", "");
 										if(class_name) {
 											alert("Saved as "+ class_name);
-											code_to_server(codestring, class_name);
+											code_to_server(codestring, class_name, std_input);
 										}
       	  							else alert("Canceled");
       								}
-								function code_to_server(codestring, class_name) {
-									var codeJSON = {"classname" : class_name, "code" : codestring};
+								function code_to_server(codestring, class_name, std_input) {
+									var codeJSON = {"classname" : class_name, "code" : codestring, "input" : std_input};
 									var codestring = JSON.stringify(codeJSON);
-									//console.log(codestring); 
+									console.log(codestring);
 									var xhr = new XMLHttpRequest();
 									xhr.open("POST", 'http://52.231.65.108:8080/api/run', true);
 									xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
@@ -126,9 +133,10 @@
 									xhr.send(codestring);
 									xhr.onreadystatechange = function() {
 										if (xhr.readyState == XMLHttpRequest.DONE) {
-											var result_string = xhr.response; 
-											console.log(result_string);
-											document.result_form.result_text.value += result_string;
+											var resultJSON = xhr.response; 
+											result_obj = JSON.parse(resultJSON);
+											//document.result_form.result_text.value = resultJSON;
+											document.result_form.result_text.value = result_obj.output;
 										}
 									}	
 								}
