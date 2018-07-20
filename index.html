@@ -19,8 +19,7 @@
 		<script src="mode/clike/clike.js"></script>
 		<script src="addon/edit/matchbrackets.js"></script>
 		<script src="addon/edit/closebrackets.js"></script>
-		<script src="doc/activebookmark.js"></script>
-
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
 		<!-- Wrapper -->
 			<div id="wrapper">
 
@@ -48,18 +47,14 @@
 						</nav>
 					 </header>
 	  
-
-				<!-- Menu -->
 					<section id="menu">
 
-						<!-- Search -->
 							<section>
 								<form class="search" method="get" action="#">
 									<input type="text" name="query" placeholder="Search" />
 								</form>
 							</section>
 
-						<!-- Links -->
 							<section>
 								<ul class="links">
 									<li>
@@ -89,7 +84,6 @@
 								</ul>
 							</section>
 
-						<!-- Actions -->
 							<section>
 								<ul class="actions stacked">
 									<li><a href="#" class="button large fit">Log In</a></li>
@@ -98,22 +92,40 @@
 
 					</section>
 
-				<!-- Main -->
 					<div id="main">
-						<form><textarea id="code" name ="code">
-						</textarea>
-							</form>
+						<form name = "code_form"><textarea id="code_text"></textarea></form>
+							<button type="button" onclick="save_to_server();">Save</button>
+							<button type="button" onclick="btn_js_prompt_click();">Compile</button>
+							<form name = "result_form" style="margin-top: 3em;"><textarea id="result_text" name ="result_text"></textarea></form>
 							  <script>
-								var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+								var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
 									matchBrackets: true,
 									autoCloseBrackets: true,
         							theme: "yeti",
         							mode: "text/x-scala"
 								});
-								var codestring = document.getElementById("code").value;
+								function btn_js_prompt_click(){
+										var codestring = editor.getValue();
+										var class_name = prompt("Please Write your Class Name", "");
+										if(class_name) {
+											alert("Saved as "+ class_name);
+											code_to_server(codestring, class_name);
+										}
+      	  							else alert("Canceled");
+      								}
+								function code_to_server(codestring, class_name) {
+									var codeJSON = {"classname" : class_name, "code" : codestring};
+									var codestring = JSON.stringify(codeJSON);
+									console.log(codestring); 
+									var xhr = new XMLHttpRequest();
+									xhr.open("POST", 'http://52.231.65.108:8080/api/run', true);
+									xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr.setRequestHeader("Content-Type", "application/json");
+									xhr.send(codestring);
+								}
 							  </script>
-
 			</div>
 
 
