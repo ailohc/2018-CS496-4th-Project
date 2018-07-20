@@ -64,7 +64,7 @@ function compile_scala(req, res, dirPath) {
       res.json(resJson);
       return;
     }
-    execute_scala(req, res, dirPath);
+    execute_scala_stdin_at_once(req, res, dirPath);
   });
 }
 
@@ -77,19 +77,22 @@ function execute_scala(req, res, dirPath) {
         console.log(stderr);
         resJson.success = 2;
         resJson.output = stderr;
+        res.json(resJson);
       }else if (stdout) {
         console.log(stdout);
         resJson.success = 3;
         resJson.output = stdout;
         console.log(resJson);
+        res.json(resJson);
       }
-      res.json(resJson);
+
       return;
     });
+
     child.addListener('exit', () => {
       clearTimeout(to);
       console.log('child exited!');
-    })
+    });
 
     let to = setTimeout(()=> {
       child.kill();
@@ -99,3 +102,94 @@ function execute_scala(req, res, dirPath) {
     }, 30000); //TODO
   }, 1000);
 }
+
+
+function execute_scala_stdin_at_once(req, res, dirPath) {
+  setTimeout(function() {
+    resJson.output = "";
+    let child = child_process.exec(`scala -cp ${dirPath} ${req.body.classname}`, (err) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+    });
+
+    child.stdout.on('data', (data) => {
+      console.log('stdout!');
+      console.log(data);
+      resJson.success = 3;
+      resJson.output += data;
+    });
+
+    child.stderr.on('data', (data) => {
+      console.log('stderr!');
+      console.log(data);
+      resJson.success = 2;
+      resJson.output = data;
+      res.json(resJson);
+    });
+
+    child.stdin.setEncoding('utf-8');
+    child.stdin.write(req.body.input);
+    child.stdin.end();
+
+    child.addListener('exit', () => {
+      clearTimeout(to);
+      console.log('child exited!');
+      res.json(resJson);
+    });
+
+    let to = setTimeout(()=> {
+      child.kill();
+      console.log('child killed');
+      res.json(resJson);
+      return;
+    }, 30000); //TODO
+  }, 1000);
+}
+
+/*
+function execute_scala_stdin_parse(req, res, dirPath) {
+  setTimeout(function() {
+    let child = child_process.exec(`scala -cp ${dirPath} ${req.body.classname}`, (err) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+    });
+
+    child.stdout.on('data', (data) => {
+      console.log('stdout!');
+      console.log(data);
+      resJson.success = 3;
+      resJson.output = stdout;
+      res.json(resJson);
+    });
+
+    child.stderr.on('data', (data) => {
+      console.log('stderr!');
+      console.log(data);
+      resJson.success = 2;
+      resJson.output = stderr;
+      res.json(resJson);
+    });
+
+    child.stdin.setEncoding('utf-8');
+    let stdinArray = new Array();
+    let stdinPreArray = req.body.input.split("\n");
+    for (let i=0; i<stdinPreArray.length; i+)
+    child.stdin.write(req.body.input);
+
+    child.addListener('exit', () => {
+      clearTimeout(to);
+      console.log('child exited!');
+    });
+
+    let to = setTimeout(()=> {
+      child.kill();
+      console.log('child killed');
+      res.json(resJson);
+      return;
+    }, 30000); //TODO
+  }, 1000);
+} */
