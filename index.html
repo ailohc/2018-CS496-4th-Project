@@ -1,47 +1,53 @@
 <!DOCTYPE HTML>
-<!--
-	Future Imperfect by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
 <html>
 	<head>
-		<title>Future Imperfect by HTML5 UP</title>
+		<title>Scala Editor</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 	</head>
 	<body class="is-preload">
+		<link rel="stylesheet" href="theme/yeti.css">
+		<link rel="stylesheet" href="lib/codemirror.css">
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script src="theme/yeti.css"></script>
+		<script src="lib/codemirror.js"></script>
+		<script src="mode/clike/clike.js"></script>
+		<script src="addon/edit/matchbrackets.js"></script>
+		<script src="addon/edit/closebrackets.js"></script>
+		<script src="doc/activebookmark.js"></script>
 
 		<!-- Wrapper -->
 			<div id="wrapper">
 
 				<!-- Header -->
-					<header id="header">
-						<h1><a href="index.html">Future Imperfect</a></h1>
+				<header id="header">
+						<h1><a href="index.html">Scala Editor</a></h1>
 						<nav class="links">
-							<ul>
-								<li><a href="#">Lorem</a></li>
-								<li><a href="#">Ipsum</a></li>
-								<li><a href="#">Feugiat</a></li>
-								<li><a href="#">Tempus</a></li>
-								<li><a href="#">Adipiscing</a></li>
-							</ul>
+						   <ul>
+							  <li class="dropdown">
+								 <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+								 <div class="dropdown-content">
+									<a href="#">Link 1></a>
+									<a href="#">Link 2></a>
+									<a href="#">Link 3></a>
+								 </div>
+							  <li>
+						   </ul>
 						</nav>
 						<nav class="main">
-							<ul>
-								<li class="search">
-									<a class="fa-search" href="#search">Search</a>
-									<form id="search" method="get" action="#">
-										<input type="text" name="query" placeholder="Search" />
-									</form>
-								</li>
-								<li class="menu">
-									<a class="fa-bars" href="#menu">Menu</a>
-								</li>
-							</ul>
+						   <ul>
+							  <li class="menu">
+								 <a class="fa-bars" href="#menu">Menu</a>
+							  </li>
+						   </ul>
 						</nav>
-					</header>
+					 </header>
+	  
 
 				<!-- Menu -->
 					<section id="menu">
@@ -94,15 +100,22 @@
 
 				<!-- Main -->
 					<div id="main">
+						<form><textarea id="code" name ="code">
+						</textarea>
+							</form>
+							  <script>
+								var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+									lineNumbers: true,
+									matchBrackets: true,
+									autoCloseBrackets: true,
+        							theme: "yeti",
+        							mode: "text/x-scala"
+								});
+								var codestring = document.getElementById("code").value;
+							  </script>
 
 			</div>
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
 
 	</body>
 </html>
