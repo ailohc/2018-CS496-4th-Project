@@ -1,0 +1,148 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Single - Future Imperfect by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="single is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+				<header id="header">
+						<h1><a href="projectpage.html">Scala Editor</a></h1>
+						<nav class="links">
+						   <ul>
+							  <li class="dropdown">
+								 <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+								 <div class="dropdown-content">
+									<a href="#">Link 1></a>
+									<a href="#">Link 2></a>
+									<a href="#">Link 3></a>
+								 </div>
+							  <li>
+						   </ul>
+						</nav>
+						<nav class="main">
+						   <ul>
+							  <li class="menu">
+								 <a class="fa-bars" href="#menu">Menu</a>
+							  </li>
+						   </ul>
+						</nav>
+					 </header>
+
+			<section>
+				<form>
+					<fieldset>
+						<legend>login</legend>
+						username:<input type="text" name="username" /><span id="note1"></span><br />
+						password:<input type="password" name="password" /><span id="note2"></span><br />
+						<input type="button" value="login" onclick="login(this.form)" a href="projectpage.html" />
+						<p id="response"></p>
+					</fieldset>
+					</form>
+					<a href="register.html">register</a>
+			</section>
+
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				function id(id){
+					return document.getElementById(id);
+				}
+				/*
+				function setCookie(c_name,value,expiredays){
+					var exdate=new Date();
+					exdate.setDate(exdate.getDate()+expiredays);
+					document.cookie=c_name+ "=" +escape(value)+
+					((expiredays==null) ? "" : ";expires="+exdate.toUTCString());
+				}
+				*/
+				function login(form){
+					if(form.username.value == ""){
+						id("note1").textContent="please enter the username";
+						form.username.focus();
+						return;
+					}
+					else
+						id("note1").textContent="";
+					if(form.password.value == ""){
+						id("note2").textContent="please enter the password";
+						form.password.focus();
+						return;
+					}
+					else
+						id("note2").textContent="";
+					
+
+					var codeJSON = {"id" : form.username.value, "pw" : form.password.value};
+					var codestring = JSON.stringify(codeJSON);
+					var ajax=new XMLHttpRequest();
+					ajax.open("POST", 'http://52.231.65.108:8080/signin', true);
+					//ajax.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+					ajax.setRequestHeader('Access-Control-Allow-Origin', '*');
+					ajax.setRequestHeader("Access-Control-Allow-Credentials", "true");
+					ajax.setRequestHeader("Content-Type", "application/json");
+					ajax.send(codestring);
+					console.log(codestring);
+					ajax.onreadystatechange = function(){
+						if(this.readyState == 4 && this.status == 200){
+							var check = this.responseText;
+							alert(check);
+							if(check == "true"){
+								//setCookie('username',form.username.value,10);
+								location.replace("index.html");
+							}
+							else if(check == "false"){
+								id("response").textContent="wrong username or password";
+								return;
+							}
+							else{
+								id("response").textContent="...error";		
+								return;
+							}
+						}
+					}
+				}
+				/*
+			    function login_to_server(id, pw) {
+                       var codeJSON = {"id" : id, "pw" : pw};
+                       var codestring = JSON.stringify(codeJSON);
+                       console.log(codestring);
+                       var xhr = new XMLHttpRequest();
+                       xhr.open("POST", 'http://52.231.65.108:8080/signin', true);
+                       xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+                       xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+                       xhr.setRequestHeader("Content-Type", "application/json");
+                       xhr.send(codestring);
+                       xhr.onreadystatechange = function() {
+                          if (xhr.readyState == XMLHttpRequest.DONE) {
+                             var resultJSON = xhr.response; 
+                             result_obj = JSON.parse(resultJSON);
+							 if (result_obj.success == "true") {
+
+							 }
+							 else if (){
+
+							 }
+
+                          }
+                       }   
+                    }
+                */
+			</script>
+
+	</body>
+</html>

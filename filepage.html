@@ -1,0 +1,161 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Scala Editor</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+		<link rel="stylesheet" href="theme/yeti.css">
+		<link rel="stylesheet" href="lib/codemirror.css">
+		<script src="assets/js/jquery.min.js"></script>
+		<script src="assets/js/browser.min.js"></script>
+		<script src="assets/js/breakpoints.min.js"></script>
+		<script src="assets/js/util.js"></script>
+		<script src="assets/js/main.js"></script>
+		<script src="theme/yeti.css"></script>
+		<script src="lib/codemirror.js"></script>
+		<script src="mode/clike/clike.js"></script>
+		<script src="addon/edit/matchbrackets.js"></script>
+		<script src="addon/edit/closebrackets.js"></script>
+		<script src="addon/dialog/dialog.js"></script>
+		<script src="addon/search/searchcursor.js"></script>
+		<script src="addon/search/search.js"></script>
+		<script src="addon/scroll/annotatescrollbar.js"></script>
+		<script src="addon/search/matchesonscrollbar.js"></script>
+		<script src="addon/search/jump-to-line.js"></script>
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+				<header id="header">
+						<h1><a href="projectpage.html">Scala Editor</a></h1>
+						<nav class="links">
+						   <ul>
+							  <li class="dropdown">
+								 <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+								 <div class="dropdown-content">
+									<a href="#">Link 1></a>
+									<a href="#">Link 2></a>
+									<a href="#">Link 3></a>
+								 </div>
+							  <li>
+						   </ul>
+						</nav>
+						<nav class="main">
+								<ul>
+									<li class="menu">
+										<a class="fa-bars" href="#menu">Menu</a>
+									</li>
+								</ul>
+							</nav>
+						</header>
+	  
+					<section id="menu">
+							<section>
+									<ul class="links" id="filelinks">
+									</ul>
+								</section>
+								<section>
+									<ul class="actions stacked">
+										<li><a href="#" class="button large fit">Log Out</a></li>
+									</ul>
+								</section>
+	
+						</section>
+
+					<div id="main">
+						<section id="intro">
+									<header>
+										<p id="codename">codename</a></p>
+									</header>
+						</section>
+						<form name = "code_form"><textarea id="code_text"></textarea></form>
+							<button type="button" onclick="save_to_server();">Save</button>
+							<button type="button" onclick="btn_run_click();">Run</button>
+							<form name = "std_inform"><textarea item-width="10dp" id="std_in" name = "std_in"></textarea></form>
+							<form name = "result_form" style="margin-top: 3em;"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
+							  <script>
+								var array = "";
+								array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
+								window.addEventListener('DOMContentLoaded', function(){ 
+										var xh = new XMLHttpRequest();
+										xh.open("GET", 'http://52.231.65.108:8080/api/files', true);
+										xh.send(null);
+										xh.onreadystatechange = function() {
+																if (xh.readyState == XMLHttpRequest.DONE) {
+																	var resultJSON = xh.response; 
+																	result_obj = JSON.parse(resultJSON);
+																	console.log(result_obj);
+																}
+															}	
+									})
+								var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
+									lineNumbers: true,
+									matchBrackets: true,
+									autoCloseBrackets: true,
+        							theme: "yeti",
+									mode: "text/x-scala" 
+								});
+								array.forEach(function(item) {
+                				var li = document.createElement("li");
+                				var text = document.createTextNode(item);
+                				li.innerHTML = "<a href='#' onclick='link_click(this);' id="+item+">"+"<h3>"+item+"</h3>";
+                				document.getElementById("filelinks").appendChild(li);
+                				});
+								function link_click(element){
+									let selected = element.getAttribute('id');
+									console.log(selected);
+									var xhr = new XMLHttpRequest();
+									xhr.open("POST", 'http://52.231.65.108:8080/api/?', true);
+									document.getElementById("codename").innerText = selected;
+								}
+								function btn_run_click(){
+										document.result_form.result_text.value = "";
+										var std_input = document.std_inform.std_in.value;
+										var codestring = editor.getValue();
+										swal({
+											text: 'Enter the Class Name',
+											content: "input",
+											button: {
+												text: "Run",
+												closeModal: false,
+											},
+										})
+										.then(value => {
+											if (!value) throw null;
+											code_to_server(codestring, value, std_input);
+											swal('Saved!');
+										})
+      								}
+								function code_to_server(codestring, class_name, std_input) {
+									var codeJSON = {"classname" : class_name, "code" : codestring, "input" : std_input};
+									var codestring = JSON.stringify(codeJSON);
+									console.log(codestring);
+									var xhr = new XMLHttpRequest();
+									xhr.open("POST", 'http://52.231.65.108:8080/api/run', true);
+									xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr.setRequestHeader("Content-Type", "application/json");
+									xhr.send(codestring);
+									xhr.onreadystatechange = function() {
+										if (xhr.readyState == XMLHttpRequest.DONE) {
+											var resultJSON = xhr.response; 
+											result_obj = JSON.parse(resultJSON);
+											//document.result_form.result_text.value = resultJSON;
+											document.result_form.result_text.value = result_obj.output;
+										}
+									}	
+								}
+								
+							  </script>
+			</div>
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+	</body>
+</html>

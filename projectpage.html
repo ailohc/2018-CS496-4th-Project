@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Scala Editor</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+            <script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+            <script src="assets/js/main.js"></script>
+			<div id="wrapper">
+                    <header id="header">
+                            <h1><a href="projectpage.html">Scala Editor</a></h1>
+                            <nav class="links">
+                               <ul>
+                                  <li class="dropdown">
+                                     <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+                                     <div class="dropdown-content">
+                                        <a href="#">Link 1></a>
+                                        <a href="#">Link 2></a>
+                                        <a href="#">Link 3></a>
+                                     </div>
+                                  <li>
+                               </ul>
+                            </nav>
+                            <nav class="main">
+                               <ul>
+                                  <li class="menu">
+                                     <a class="fa-bars" href="#menu">Menu</a>
+                                  </li>
+                               </ul>
+                            </nav>
+                         </header>
+					<section id="menu">
+							<section>
+								<form class="search" method="get" action="#">
+									<input type="text" name="query" placeholder="Search" />
+								</form>
+							</section>
+
+					</section>
+
+                    <div id="main">
+							<section>
+								<ul class="posts" id="myUl"></ul>
+							</section>
+			</div>
+
+            <script>
+            var user = "";
+            var array = "";
+            window.addEventListener('DOMContentLoaded', function(){ 
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", 'http://52.231.65.108:8080/api/projects', true);
+                xhr.send(null);
+                xhr.onreadystatechange = function() {
+										if (xhr.readyState == XMLHttpRequest.DONE) {
+											var resultJSON = xhr.response; 
+											result_obj = JSON.parse(resultJSON);
+                                            console.log(result_obj);
+										}
+									}	
+            })
+            array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
+                array.forEach(function(item) {
+                var li = document.createElement("li");
+                var text = document.createTextNode(item);
+                var generateRandom = function (min, max) {
+                    var ranNum = Math.floor(Math.random()*(max-min+1)) + min;
+                    return ranNum;
+                }
+                var image_num = generateRandom(10, 12);
+                li.innerHTML = "<article><header><h3><a href='filepage.html' onclick='link_click(this);' id="+item+">"+item+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
+                document.getElementById("myUl").appendChild(li);
+                });
+
+            function link_click(element){
+                let selected = element.getAttribute('id');
+                console.log(selected);
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", 'http://52.231.65.108:8080/api/?', true);
+                /***todo***/
+      			}
+            </script>
+
+	</body>
+</html>
