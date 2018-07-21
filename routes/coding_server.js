@@ -1,6 +1,6 @@
 module.exports = (app, User, Project) => {
-    app.get('/mypage', (req, res) => {
-        console.log('mypage!'+req.session.user_id);
+    app.get('/myprojects', (req, res) => {
+        console.log('myprojects!'+req.session.user_id);
         res.render('projectpage.html');
     });
 
@@ -33,34 +33,50 @@ module.exports = (app, User, Project) => {
                 return;
             } else if (user) {
                 console.log("user.findone success!");
-
-                //1.make new project
-                let project = new Project();
-                project.user_id = user.user_id;
-                project.projectname = req.body.projectname;
-                project.files = new Array();
-                project.save((err) => {
+                Project.find({projectname:req.body.projectname}, (err, projects) => {
                     if (err) {
                         console.log(err);
                         res.json({success:false});
                         return;
                     }
-                    //2.update user.projectnames & user.projets
-                    user.projectnames.push(req.body.projectname); //TODO: will this work..?
-                    user.save((err) => {
-                        if (err) {
-                            console.log(err);
-                            res.json({success:false});
-                            return;
-                        }
-                        console.log('project create success!')
-                        res.json({success:true, projectname:user.projectnames});
+                    if (projects.length > 0) {
+                        res.json({success:false});
                         return;
-                    }); //user.save
-                }); //project.save
+                    }
+                    make_project(req, res, user);
+                });
             }
         });
-    })
+    });
+
+    function make_project(req, res, user) {
+        //1.make new project
+        let project = new Project();
+        project.user_id = user.user_id;
+        project.projectname = req.body.projectname;
+        project.files = new Array();
+        project.save((err) => {
+            if (err) {
+                console.log(err);
+                res.json({success:false});
+                return;
+            }
+            //2.update user.projectnames & user.projets
+            user.projectnames.push(req.body.projectname);
+            user.save((err) => {
+                if (err) {
+                    console.log(err);
+                    res.json({success:false});
+                    return;
+                }
+                console.log('project create success!')
+                res.json({success:true, projectname:user.projectnames});
+                return;
+            }); //user.save
+        }); //project.save
+    }
+
+    
 
     app.post('/files', (req, res) => {
         Project.findOne({
@@ -72,7 +88,7 @@ module.exports = (app, User, Project) => {
             if (err) {
                 console.log("user.findone err");
                 console.log(err);
-                res.json({success:false});
+                res.json({success:false, username: req.session.user_id});
                 return;
             } else if (project) {
                 console.log("project.findone success!");
@@ -81,17 +97,40 @@ module.exports = (app, User, Project) => {
                 for (let i=0; i<storedFiles.length; i++) {
                     filenames.push(storedField[i]);
                 }
-                res.json({success:true, files:filenames});
+                res.json({success:true, username: req.session.user_id, files:filenames});
                 return;
             } else {
-                res.json({success:false});
+                res.json({success:false, username: req.session.user_id});
                 return;
             }
         });
     });
 
     app.post('/files-select', (req, res) => {
-
+        Project.findOne({
+            $and: [
+            {user_id: req.session.user_id},
+            {projectname: req.body.projectname}
+            ]
+        }, (err, project) => {
+            if (err) {
+                console.log("user.findone err");
+                console.log(err);
+                res.json({success:false, filename:req.body.filename});
+                return;
+            } else if (project) {
+                console.log("project.findone success!");
+                let storedFiles = project.files;
+                for (let i=0; i<storedFiles.length; i++) {
+                    if (storedFiles[i].filename == req.body.filename) {
+                        res.json({success:true, filename:req.body.filename, code:storedFiles[i].code});
+                        return;
+                    }
+                }
+            }
+            res.json({success:false, filename:req.body.filename});
+            return;
+        });
     });
 
     function copyArray(array) {

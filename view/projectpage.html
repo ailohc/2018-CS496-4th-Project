@@ -81,7 +81,7 @@
 										xhr1.setRequestHeader("Content-Type", "application/json");
 										xhr1.send(codestring);
 										xhr1.onreadystatechange = function() {
-											if (xhr.readyState == XMLHttpRequest.DONE) {
+											if (xhr1.readyState == XMLHttpRequest.DONE) {
 												var resultJSON = xhr1.response; 
 												result_obj = JSON.parse(resultJSON);
 												swal('Saved!');

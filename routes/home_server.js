@@ -23,7 +23,7 @@ module.exports = (app, User) => {
         let id = req.params.id;
         console.log(`login success / id : ${id}`);
         req.session.user_id = id;
-        res.redirect('/mypage');
+        res.redirect('/myprojects');
     });
 
     
