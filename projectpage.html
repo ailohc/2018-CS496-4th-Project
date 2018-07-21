@@ -15,16 +15,14 @@
             <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 			<div id="wrapper">
                     <header id="header">
-                            <h1><a href="projectpage.html">Scala Editor</a></h1>
+                            <h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
                             <nav class="links">
                                <ul>
                                   <li class="dropdown">
-                                     <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+                                     <a href="javascript:void(0)" class="dropbtn">My Editor</a>
                                      <div class="dropdown-content">
-                                        <a href="#">NEW directory</a>
-                                        <a href="#">Link 2></a>
-                                        <a href="#">Link 3></a>
-                                     </div>
+                                        <a href="#">Log Out</a>
+                                        </div>
                                   <li>
                                </ul>
                             </nav>
@@ -92,7 +90,7 @@
             }
             //for rendering - go back to the filepage
 			function go_to_filepage() {
-				location.replace('/myprojects');
+				location.replace('/mypages');
             }
             array = [];
             //array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]

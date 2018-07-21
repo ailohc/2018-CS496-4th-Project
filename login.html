@@ -1,7 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
-		<title>Single - Future Imperfect by HTML5 UP</title>
+		<title>Scala Editor</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -13,45 +13,23 @@
 
 				<!-- Header -->
 				<header id="header">
-						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
+						<h1><a href="login.html">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
 							  <li class="dropdown">
-								 <a href="javascript:void(0)" class="dropbtn">Dropdown</a>
+								 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
 								 <div class="dropdown-content">
-									<a href="#">Link 1></a>
-									<a href="#">Link 2></a>
-									<a href="#">Link 3></a>
+									<a href="signin.html">Sign In</a>
+									<a href="signup.html">Sign Up</a>
 								 </div>
 							  <li>
 						   </ul>
 						</nav>
-						<nav class="main">
-						   <ul>
-							  <li class="menu">
-								 <a class="fa-bars" href="#menu">Menu</a>
-							  </li>
-						   </ul>
-						</nav>
 					 </header>
-
-			<section>
-				<form>
-					<fieldset>
-						<legend>Sign In</legend>
-						username:<input type="text" name="username" /><span id="note1"></span><br />
-						password:<input type="password" name="password" /><span id="note2"></span><br />
-						<input type="button" value="login" onclick="login(this.form)" />
-						<p id="response"></p>
-					</fieldset>
-					</form>
-					<legend>Don't have an account? Sign up!</legend>
-					<a href="signup.html">Sign Up</a>
-			</section>
+			<article class="mini-post">
+				<a class="image featured"><img src="images/scala_home.jpg" alt="" height="700" width="200" /></a></article>
 
 
-
-			</div>
 
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>
@@ -59,58 +37,6 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-			<script>
-				//for rendering - go back to the filepage
-				function go_to_filepage() {
-					location.replace('/myprojects');
-				}
-				function id(id){
-					return document.getElementById(id);
-				}
-				function login(form){
-					if(form.username.value == ""){
-						id("note1").textContent="please enter the username";
-						form.username.focus();
-						return;
-					}
-					else
-						id("note1").textContent="";
-					if(form.password.value == ""){
-						id("note2").textContent="please enter the password";
-						form.password.focus();
-						return;
-					}
-					else
-						id("note2").textContent="";
-					
-
-					var codeJSON = {"id" : form.username.value, "pw" : form.password.value};
-					var codestring = JSON.stringify(codeJSON);
-					var ajax=new XMLHttpRequest();
-					ajax.open("POST", 'http://52.231.65.108:8080/signin', true);
-					ajax.setRequestHeader('Access-Control-Allow-Origin', '*');
-					ajax.setRequestHeader("Access-Control-Allow-Credentials", "true");
-					ajax.setRequestHeader("Content-Type", "application/json");
-					ajax.send(codestring);
-					console.log(codestring);
-					ajax.onreadystatechange = function(){
-						var resultJSON = ajax.response;
-						var result_obj = JSON.parse(resultJSON);
-						var check = result_obj.success;
-						if(check == true){
-							location.replace('/myprojects');
-						}
-						else if(check == false){
-							id("response").textContent="wrong username or password";
-							return;
-						}
-						else{
-							id("response").textContent="...error";		
-							return;
-						}
-					}
-				}
-			</script>
 
 	</body>
 </html>
