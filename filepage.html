@@ -86,7 +86,7 @@
 																if (xh.readyState == XMLHttpRequest.DONE) {
 																	var resultJSON = xh.response; 
 																	result_obj = JSON.parse(resultJSON);
-																	console.log(result_obj);
+																	array = result_obj.projects;
 																}
 															}	
 									});
@@ -113,9 +113,23 @@
 								function link_click(element){
 									let selected = element.getAttribute('id');
 									console.log(selected);
-									var xhr = new XMLHttpRequest();
-									xhr.open("POST", 'http://52.231.65.108:8080/api/?', true);
 									document.getElementById("codename").innerText = selected+".scala";
+									var fileJSON = {"filename" : selected};
+									var filestring = JSON.stringify(fileJSON);
+									console.log(filestring);
+									var xhr1 = new XMLHttpRequest();
+									xhr1.open("POST", 'http://52.231.65.108:8080/files/select', true);
+									xhr1.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr1.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr1.setRequestHeader("Content-Type", "application/json");
+									xhr1.send(filestring);
+									xhr1.onreadystatechange = function() {
+										if (xhr1.readyState == XMLHttpRequest.DONE) {
+											var file_resultJSON = xhr1.response;
+											file_result_obj = JSON.parse(file_resultJSON);
+											editor.value = file_result_obj.code;
+										}
+									}
 								}
 								//when the run button is clicked
 								function btn_run_click(){
