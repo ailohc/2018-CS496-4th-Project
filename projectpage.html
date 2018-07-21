@@ -1,0 +1,132 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Scala Editor</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+            <script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+            <script src="assets/js/main.js"></script>
+            <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+			<div id="wrapper">
+                    <header id="header">
+                            <h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
+                            <nav class="links">
+                               <ul>
+                                  <li class="dropdown">
+                                     <a href="javascript:void(0)" class="dropbtn">My Editor</a>
+                                     <div class="dropdown-content">
+                                        <a href="#">Log Out</a>
+                                        </div>
+                                  <li>
+                               </ul>
+                            </nav>
+                         </header>
+
+                    <div id="main">
+                            
+                            <form style="margin-bottom: 5em;">
+							<section>
+								<ul class="posts" id="myUl"></ul>
+                            </section>
+                            <button type="button" onclick="get_projectname();">NEW DIRECTORY</button>
+                        </form>
+			    </div>
+
+            <script>
+            var user = "";
+            var array = "";
+            //when loaded, get user and project data from server
+            window.addEventListener('DOMContentLoaded', function(){ 
+                var xhr = new XMLHttpRequest();
+                xhr.open("GET", 'http://52.231.65.108:8080/projects', true);
+                xhr.send(null);
+                xhr.onreadystatechange = function() {
+										if (xhr.readyState == XMLHttpRequest.DONE) {
+											var resultJSON = xhr.response; 
+											result_obj = JSON.parse(resultJSON);
+                                            array = result_obj.projects;
+                                            console.log(array);
+										}
+									}	
+            });
+            //get projectname from user
+            function get_projectname() {
+                swal({
+					text: 'Enter the Project Name',
+					content: "input",
+					button: {
+                        closeModal: false,
+                    },
+                    })
+					.then(value => {
+					if (!value) throw null;
+					make_dir(value);
+				})
+            }
+            //make directory by input name
+            function make_dir(value) {
+                var codeJSON = {"projectname" : value};
+										var codestring = JSON.stringify(codeJSON);
+										console.log(codestring);
+										var xhr1 = new XMLHttpRequest();
+										xhr1.open("POST", 'http://52.231.65.108:8080/projects-make', true);
+										xhr1.setRequestHeader('Access-Control-Allow-Origin', '*');
+										xhr1.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										xhr1.setRequestHeader("Content-Type", "application/json");
+										xhr1.send(codestring);
+										xhr1.onreadystatechange = function() {
+											if (xhr.readyState == XMLHttpRequest.DONE) {
+												var resultJSON = xhr1.response; 
+												result_obj = JSON.parse(resultJSON);
+												swal('Saved!');
+											}
+										}	
+            }
+            //for rendering - go back to the filepage
+			function go_to_filepage() {
+				location.replace('/mypages');
+            }
+            array = [];
+            //array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
+            //creating list elements on the page
+                array.forEach(function(item) {
+                var li = document.createElement("li");
+                var text = document.createTextNode(item);
+                var generateRandom = function (min, max) {
+                    var ranNum = Math.floor(Math.random()*(max-min+1)) + min;
+                    return ranNum;
+                }
+                var image_num = generateRandom(10, 12);
+                li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+item+">"+item+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
+                document.getElementById("myUl").appendChild(li);
+                });
+            //when project links are clicked, move to filepage
+            function link_click(element){
+                let selected = element.getAttribute('id');
+                console.log(selected);
+                var projectJSON = {"projectname" : selected};
+                var projectstring = JSON.stringify(projectJSON);
+				console.log(projectstring);
+                var xhr2 = new XMLHttpRequest();
+                xhr2.open("POST", 'http://52.231.65.108:8080/api/projects-select', true);
+                xhr2.setRequestHeader('Access-Control-Allow-Origin', '*');
+				xhr2.setRequestHeader("Access-Control-Allow-Credentials", "true");
+                xhr2.setRequestHeader("Content-Type", "application/json");
+                xhr2.send(projectstring);
+                xhr2.onreadystatechange = function() {
+					if (xhr2.readyState == XMLHttpRequest.DONE) {
+							}
+						}	
+                /***todo***/
+                //location.replace('/coding');
+      			}
+            </script>
+
+	</body>
+</html>

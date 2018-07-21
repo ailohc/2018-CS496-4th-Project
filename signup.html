@@ -1,0 +1,110 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Scala Editor</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="./assets/css/main.css" />
+	</head>
+	<body class="single is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+				<header id="header">
+						<h1><a href="login.html">Scala Editor</a></h1>
+						<nav class="links">
+						   <ul>
+							  <li class="dropdown">
+								 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
+								 <div class="dropdown-content">
+									<a href="signin.html">Sign In</a>
+									<a href="signup.html">Sign Up</a>
+								 </div>
+							  <li>
+						   </ul>
+						</nav>
+					 </header>
+
+			<section>
+					<form>
+							<h2>Sign Up</h2>
+							<h7>username:<input type="text" name="username" /><sapn id="note1"></sapn><br /></h7>
+							<h7>password:<input type="password" name="password" value=""/><span id="note2"></span><br /></h7>
+							<h7>check password:<input type="password" name="chkpasswd" value="" onblur="checkpw(this.form)" /><span id="note3"></span><br /></h7>
+							<input type="button" value="Sign in" onclick="register(this.form)" />
+							<p id="check"></p>
+					</form>
+					<h7>Already have an account? </h7>
+					<h7><a href="signin.html">Sign In</a></h7>
+			</section>
+
+
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script type="text/javascript">
+				function id(id){
+					return document.getElementById(id);
+				}
+				function checkpw(form){
+					if(form.password.value != form.chkpasswd.value){
+						id("note3").textContent="password and checkpassword not same";
+						form.username.focus();
+						return;
+					}
+					else
+						id("note3").textContent="";
+				}
+				function register(form){
+					if(form.username.value == ""){
+						id("note1").textContent="please enter the username";
+						form.username.focus();
+						return;
+					}
+					else
+						id("note1").textContent="";
+					if(form.password.value == ""){
+						id("note2").textContent="please enter the password";
+						form.password.focus();
+						return;
+					}
+					else
+						id("note1").textContent="";
+
+					var codeJSON = {"id" : form.username.value, "pw" : form.password.value};
+					var codestring = JSON.stringify(codeJSON);
+					var ajax=new XMLHttpRequest();
+					ajax.open("POST", 'http://52.231.65.108:8080/signup', true);
+					ajax.setRequestHeader('Access-Control-Allow-Origin', '*');
+					ajax.setRequestHeader("Access-Control-Allow-Credentials", "true");
+					ajax.setRequestHeader("Content-Type", "application/json");
+					ajax.send(codestring);
+					console.log(codestring);
+					ajax.onreadystatechange = function(){
+						var resultJSON = ajax.response;
+						var result_obj = JSON.parse(resultJSON);
+						var check = result_obj.success;
+						//NEED TO CHANGE
+						if(check == 1){
+							id("check").textContent="this id has been used";
+							return;
+						}
+						else{
+							id("check").textContent="...error";
+							return;
+						}
+					}		
+				}
+			</script>
+
+
+	</body>
+</html>
