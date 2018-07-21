@@ -70,10 +70,12 @@
 									</header>
 						</section>
 						<form name = "code_form"><textarea id="code_text"></textarea></form>
-							<button type="button" onclick="save_to_server();">Save</button>
+							<p><button type="button" onclick="save_to_server();">Save</button>
 							<button type="button" onclick="btn_run_click();">Run</button>
-							<form name = "std_inform"><textarea item-width="10dp" id="std_in" name = "std_in"></textarea></form>
-							<form name = "result_form" style="margin-top: 3em;"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
+							<h5>StdIn</h5>
+							<form class = "inputform" name = "std_inform"><textarea rows="2" id="std_in" name = "std_in"></textarea></form></p>
+							<h5>StdOut</h5>
+							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
 							  <script>
 								var array = "";
 								array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
