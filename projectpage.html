@@ -27,22 +27,7 @@
                                   <li>
                                </ul>
                             </nav>
-                            <nav class="main">
-                               <ul>
-                                  <li class="menu">
-                                     <a class="fa-bars" href="#menu">Menu</a>
-                                  </li>
-                               </ul>
-                            </nav>
                          </header>
-					<section id="menu">
-							<section>
-								<form class="search" method="get" action="#">
-									<input type="text" name="query" placeholder="Search" />
-								</form>
-							</section>
-
-					</section>
 
                     <div id="main">
 							<section>
@@ -53,6 +38,7 @@
             <script>
             var user = "";
             var array = "";
+            //when loaded, get user and project data from server
             window.addEventListener('DOMContentLoaded', function(){ 
                 var xhr = new XMLHttpRequest();
                 xhr.open("GET", 'http://52.231.65.108:8080/api/projects', true);
@@ -64,8 +50,13 @@
                                             console.log(result_obj);
 										}
 									}	
-            })
+            });
+            //for rendering - go back to the filepage
+			function go_to_filepage() {
+				location.replace('/myprojects');
+			}
             array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
+            //creating list elements on the page
                 array.forEach(function(item) {
                 var li = document.createElement("li");
                 var text = document.createTextNode(item);
@@ -74,16 +65,17 @@
                     return ranNum;
                 }
                 var image_num = generateRandom(10, 12);
-                li.innerHTML = "<article><header><h3><a href='filepage.html' onclick='link_click(this);' id="+item+">"+item+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
+                li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+item+">"+item+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
                 document.getElementById("myUl").appendChild(li);
                 });
-
+            //when project links are clicked, move to filepage
             function link_click(element){
                 let selected = element.getAttribute('id');
                 console.log(selected);
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", 'http://52.231.65.108:8080/api/?', true);
+                xhr.open("POST", 'http://52.231.65.108:8080/api/projects-select', true);
                 /***todo***/
+                //location.replace('/coding');
       			}
             </script>
 

@@ -36,17 +36,18 @@
 					 </header>
 
 			<section>
-				<form>
-					<fieldset>
-						<legend>Sign In</legend>
-						username:<input type="text" name="username" /><span id="note1"></span><br />
-						password:<input type="password" name="password" /><span id="note2"></span><br />
-						<input type="button" value="login" onclick="login(this.form)" />
-						<p id="response"></p>
-					</fieldset>
+					<form>
+						<fieldset>
+							<legend>register</legend>
+							username:<input type="text" name="username" /><sapn id="note1"></sapn><br />
+							password:<input type="password" name="password" value=""/><span id="note2"></span><br />
+							checkpassword:<input type="password" name="chkpasswd" value="" onblur="checkpw(this.form)" /><span id="note3"></span><br />
+							<input type="button" value="sent" onclick="register(this.form)" />
+							<p id="check"></p>
+						</fieldset>
 					</form>
-					<legend>Don't have an account? Sign up!</legend>
-					<a href="signup.html">Sign Up</a>
+					<legend>Already have an account? Sign in!</legend>
+					<a href="login.html">Back</a>
 			</section>
 
 
@@ -59,7 +60,7 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
-			<script>
+			<script type="text/javascript">
 				//for rendering - go back to the filepage
 				function go_to_filepage() {
 					location.replace('/myprojects');
@@ -67,7 +68,16 @@
 				function id(id){
 					return document.getElementById(id);
 				}
-				function login(form){
+				function checkpw(form){
+					if(form.password.value != form.chkpasswd.value){
+						id("note3").textContent="password and checkpassword not same";
+						form.username.focus();
+						return;
+					}
+					else
+						id("note3").textContent="";
+				}
+				function register(form){
 					if(form.username.value == ""){
 						id("note1").textContent="please enter the username";
 						form.username.focus();
@@ -81,13 +91,12 @@
 						return;
 					}
 					else
-						id("note2").textContent="";
-					
+						id("note1").textContent="";
 
 					var codeJSON = {"id" : form.username.value, "pw" : form.password.value};
 					var codestring = JSON.stringify(codeJSON);
 					var ajax=new XMLHttpRequest();
-					ajax.open("POST", 'http://52.231.65.108:8080/signin', true);
+					ajax.open("POST", 'http://52.231.65.108:8080/signup', true);
 					ajax.setRequestHeader('Access-Control-Allow-Origin', '*');
 					ajax.setRequestHeader("Access-Control-Allow-Credentials", "true");
 					ajax.setRequestHeader("Content-Type", "application/json");
@@ -97,20 +106,26 @@
 						var resultJSON = ajax.response;
 						var result_obj = JSON.parse(resultJSON);
 						var check = result_obj.success;
-						if(check == true){
-							location.replace('/myprojects');
+						//NEED TO CHANGE
+						if(check == "true"){
+							location.replace("projectpage.html");
 						}
-						else if(check == false){
-							id("response").textContent="wrong username or password";
+						else if(check == "same"){
+							id("check").textContent="this id has been used";
+							return;
+						}
+						else if(check == "false"){
+							id("check").textContent="wrong username or password";
 							return;
 						}
 						else{
-							id("response").textContent="...error";		
+							id("check").textContent=check;
 							return;
 						}
-					}
+					}		
 				}
 			</script>
+
 
 	</body>
 </html>
