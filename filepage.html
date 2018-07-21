@@ -9,6 +9,7 @@
 	<body class="is-preload">
 		<link rel="stylesheet" href="theme/yeti.css">
 		<link rel="stylesheet" href="lib/codemirror.css">
+		<link rel="stylesheet" href="addon/dialog/dialog.css">
 		<script src="assets/js/jquery.min.js"></script>
 		<script src="assets/js/browser.min.js"></script>
 		<script src="assets/js/breakpoints.min.js"></script>
@@ -25,7 +26,18 @@
 		<script src="addon/scroll/annotatescrollbar.js"></script>
 		<script src="addon/search/matchesonscrollbar.js"></script>
 		<script src="addon/search/jump-to-line.js"></script>
+		<script src="addon/search/match-highlighter.js"></script>
 		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+		<style type="text/css">
+			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+			.CodeMirror-focused .cm-matchhighlight {
+				background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+				background-position: bottom;
+				background-repeat: repeat-x;
+			}
+			.cm-matchhighlight {background-color: rgb(219, 221, 199)}
+			.CodeMirror-selection-highlight-scrollbar {background-color: rgb(212, 248, 212)}
+			</style>
 			<div id="wrapper">
 				<header id="header">
 						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
@@ -66,7 +78,8 @@
 										<p id="codename">codename</a></p>
 									</header>
 						</section>
-						<form name = "code_form"><textarea id="code_text"></textarea></form>
+						<form name = "code_form"><textarea id="code_text">
+							</textarea></form>
 							<p><button type="button" onclick="save_to_server();">Save</button>
 							<button type="button" onclick="btn_run_click();">Run</button>
 							<h5>StdIn</h5>
@@ -99,7 +112,11 @@
 									matchBrackets: true,
 									autoCloseBrackets: true,
         							theme: "yeti",
-									mode: "text/x-scala" 
+									mode: "text/x-scala",
+									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true},
+									onCursorActivity: function() {
+    									editor.matchHighlight("CodeMirror-matchhighlight");
+									  }
 								});
 								//generating list elements for file tree
 								array.forEach(function(item) {
@@ -130,6 +147,39 @@
 										}
 									}
 								}
+								//when the save button is clicked
+								function save_to_server() {
+									var savecode = editor.getValue();
+									swal({
+											text: 'Enter the Class Name',
+											content: "input",
+											button: {
+												text: "Run",
+												closeModal: false,
+											},
+										})
+										.then(value => {
+											if (!value) throw null;
+											save_code_to_server(savecode, value);
+										})
+								}
+								//send code to server for saving
+								function save_code_to_server(savecode, saveclassname) {
+										var savecodeJSON = {"classname" : saveclassname, "code" : savecode};
+										var savecodestring = JSON.stringify(savecodeJSON);
+										console.log(savecodestring);
+										var save_xhr = new XMLHttpRequest();
+										save_xhr.open("POST", 'http://52.231.65.108:8080/save', true);
+										save_xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+										save_xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										save_xhr.setRequestHeader("Content-Type", "application/json");
+										save_xhr.send(savecodestring);
+										save_xhr.onreadystatechange = function() {
+											if (save_xhr.readyState == XMLHttpRequest.DONE) {
+												swal('Saved!');
+											}
+										}	
+									}
 								//when the run button is clicked
 								function btn_run_click(){
 										document.result_form.result_text.value = "";
@@ -145,12 +195,12 @@
 										})
 										.then(value => {
 											if (!value) throw null;
-											code_to_server(codestring, value, std_input);
-											swal('Saved!');
+											run_code_to_server(codestring, value, std_input);
+											swal('Go!');
 										})
       								}
 									//send code to server for compiling
-									function code_to_server(codestring, class_name, std_input) {
+									function run_code_to_server(codestring, class_name, std_input) {
 										var codeJSON = {"classname" : class_name, "code" : codestring, "input" : std_input};
 										var codestring = JSON.stringify(codeJSON);
 										console.log(codestring);
