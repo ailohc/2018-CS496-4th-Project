@@ -7,29 +7,44 @@
 		<link rel="stylesheet" href="assets/css/main.css" />
 	</head>
 	<body class="is-preload">
-		<link rel="stylesheet" href="theme/yeti.css">
-		<link rel="stylesheet" href="lib/codemirror.css">
-		<link rel="stylesheet" href="addon/dialog/dialog.css">
-		<script src="assets/js/jquery.min.js"></script>
-		<script src="assets/js/browser.min.js"></script>
-		<script src="assets/js/breakpoints.min.js"></script>
-		<script src="assets/js/util.js"></script>
-		<script src="assets/js/main.js"></script>
-		<script src="theme/yeti.css"></script>
-		<script src="lib/codemirror.js"></script>
-		<script src="mode/clike/clike.js"></script>
-		<script src="addon/edit/matchbrackets.js"></script>
-		<script src="addon/edit/closebrackets.js"></script>
-		<script src="addon/dialog/dialog.js"></script>
-		<script src="addon/search/searchcursor.js"></script>
-		<script src="addon/search/search.js"></script>
-		<script src="addon/scroll/annotatescrollbar.js"></script>
-		<script src="addon/search/matchesonscrollbar.js"></script>
-		<script src="addon/search/jump-to-line.js"></script>
-		<script src="addon/search/match-highlighter.js"></script>
-		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+			<link rel="stylesheet" href="theme/yeti.css">
+			<link rel="stylesheet" href="lib/codemirror.css">
+			<link rel="stylesheet" href="addon/dialog/dialog.css">
+			<link rel="stylesheet" href="addon/hint/show-hint.css">
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="theme/yeti.css"></script>
+			<script src="lib/codemirror.js"></script>
+			<script src="mode/clike/clike.js"></script>
+			<script src="addon/display/fullscreen.js"></script>
+			<script src="addon/edit/matchbrackets.js"></script>
+			<script src="addon/edit/closebrackets.js"></script>
+			<script src="addon/hint/show-hint.js"></script>
+			<script src="addon/hint/anyword-hint.js"></script>
+			<script src="addon/dialog/dialog.js"></script>
+			<script src="addon/search/searchcursor.js"></script>
+			<script src="addon/search/search.js"></script>
+			<script src="addon/scroll/annotatescrollbar.js"></script>
+			<script src="addon/search/matchesonscrollbar.js"></script>
+			<script src="addon/search/jump-to-line.js"></script>
+			<script src="addon/search/match-highlighter.js"></script>
+			<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<style type="text/css">
-			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
+			@media screen and (min-width: 1300px) {
+				article { max-width: 1000px; }
+				#nav { border-right: 499px solid transparent; }
+				}
+				span.clicky {
+				cursor: pointer;
+				background: #d70;
+				color: white;
+				padding: 0 3px;
+				border-radius: 3px;
+				}
 			.CodeMirror-focused .cm-matchhighlight {
 				background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
 				background-position: bottom;
@@ -37,17 +52,24 @@
 			}
 			.cm-matchhighlight {background-color: rgb(219, 221, 199)}
 			.CodeMirror-selection-highlight-scrollbar {background-color: rgb(212, 248, 212)}
+			.CodeMirror-fullscreen {
+				position: fixed;
+				top: 0; left: 0; right: 0; bottom: 0;
+				height: auto;
+				z-index: 9;
+				}
 			</style>
 			<div id="wrapper">
 				<header id="header">
 						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
-							  <li class="dropdown">
-								 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
-								 <div class="dropdown-content">
-									<a onclick="new_file();">NEW FILE</a>								 </div>
-								 </li>
+								<li class="dropdown">
+										<a href="javascript:void(0)" class="dropbtn">My Editor</a>
+										<div class="dropdown-content">
+										   <a onclick="logout();">Log Out</a>
+										   </div>
+									 </li>
 						   </ul>
 						</nav>
 						<nav class="main">
@@ -59,18 +81,18 @@
 							</nav>
 						</header>
 	  
-					<section id="menu">
-							<section>
-									<ul class="links" id="filelinks">
-									</ul>
-								</section>
+						<section id="menu">
 								<section>
-									<ul class="actions stacked">
-										<li><a class="button large fit">Log Out</a></li>
-									</ul>
-								</section>
-	
-						</section>
+										<ul class="links" id="filelinks">
+										</ul>
+									</section>
+									<section>
+										<ul class="actions stacked">
+											<li><a class="button large fit" onclick="make_new_file();">new file</a></li>
+										</ul>
+									</section>
+		
+							</section>
 
 					<div id="main">
 						<section id="intro">
@@ -119,16 +141,32 @@
 										location.replace('/myprojects');
 									}
 									//code for coding area
-								var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
+									var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
 									matchBrackets: true,
 									autoCloseBrackets: true,
         							theme: "yeti",
 									mode: "text/x-scala",
-									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true},
+									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: false},
+									tabSize: 4,
+									indentUnit: 4,
+									indentWithTabs: true,
 									onCursorActivity: function() {
     									editor.matchHighlight("CodeMirror-matchhighlight");
-									  }
+									  },
+									  extraKeys: {
+										"Ctrl-Space": "autocomplete",
+										"F11": function(cm) {
+										cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+										$("#header").hide();
+										$("#menu").hide();
+										},
+										"Esc": function(cm) {
+										if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+										$("#header").show();
+										$("#menu").show();
+										}
+									}
 								});
 								//generating list elements for file tree
 								function refresh_file_tree(refresharray) {
@@ -159,6 +197,8 @@
 											var file_resultJSON = xhr1.response;
 											file_result_obj = JSON.parse(file_resultJSON);
 											editor.value = file_result_obj.code;
+											document.result_form.result_text.value = "";
+											document.std_inform.std_in.value = "";
 										}
 									}
 								}
@@ -177,7 +217,12 @@
 										})
 										.then(value => {
 											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
 											save_code_to_server(savecode, value);
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
 										})
 								} else {
 									var save_name = document.getElementById("codename").innerText;
@@ -221,7 +266,12 @@
 										})
 										.then(value => {
 											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
 											code_compile_one_to_server(compilecode, value);
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
 										})
 								} else {
 									var compile_name = document.getElementById("codename").innerText;
@@ -288,8 +338,13 @@
 										})
 										.then(value => {
 											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
 											run_code_to_server(codestring, value, std_input);
 											swal('Go!');
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
 										})
       								} else {
 										  run_name = document.getElementById("codename").innerText;
@@ -318,6 +373,22 @@
 												document.getElementById("codename").innerText = class_name;
 											}
 										}	
+									}
+
+									function make_new_file() {
+										console.log("new file request");
+										document.result_form.result_text.value = "";
+										document.std_inform.std_in.value = "";
+										document.getElementById("codename").innerText = "";
+										editor.value = "";
+										//window.location.reload(true);	
+									}
+									function logout() {
+										console.log("logout request");
+										var log_out = new XMLHttpRequest();
+										log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
+										log_out.send(null);
+
 									}
 								
 							  </script>
