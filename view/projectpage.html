@@ -23,7 +23,7 @@
                                      <div class="dropdown-content">
                                         <a href="#">Log Out</a>
                                         </div>
-                                  <li>
+                                  </li>
                                </ul>
                             </nav>
                          </header>
@@ -52,6 +52,17 @@
 											result_obj = JSON.parse(resultJSON);
                                             array = result_obj.projects;
                                             console.log(array);
+                                            Array.from(array, child => {
+                                            var li = document.createElement("li");
+                                            var text = document.createTextNode(child);
+                                            var generateRandom = function (min, max) {
+                                                var ranNum = Math.floor(Math.random()*(max-min+1)) + min;
+                                                return ranNum;
+                                            }
+                                            var image_num = generateRandom(10, 12);
+                                            li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+child+">"+child+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
+                                            document.getElementById("myUl").appendChild(li);
+                                            });
 										}
 									}	
             });
@@ -85,27 +96,17 @@
 												var resultJSON = xhr1.response; 
 												result_obj = JSON.parse(resultJSON);
 												swal('Saved!');
+                                                window.location.reload(true);	
 											}
-										}	
+										}                  
             }
             //for rendering - go back to the filepage
-			function go_to_filepage() {
-				location.replace('/mypages');
-            }
-            array = [];
+            function go_to_filepage() {
+				location.replace('/myprojects');
+			}
             //array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
             //creating list elements on the page
-                array.forEach(function(item) {
-                var li = document.createElement("li");
-                var text = document.createTextNode(item);
-                var generateRandom = function (min, max) {
-                    var ranNum = Math.floor(Math.random()*(max-min+1)) + min;
-                    return ranNum;
-                }
-                var image_num = generateRandom(10, 12);
-                li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+item+">"+item+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
-                document.getElementById("myUl").appendChild(li);
-                });
+
             //when project links are clicked, move to filepage
             function link_click(element){
                 let selected = element.getAttribute('id');
@@ -114,15 +115,16 @@
                 var projectstring = JSON.stringify(projectJSON);
 				console.log(projectstring);
                 var xhr2 = new XMLHttpRequest();
-                xhr2.open("POST", 'http://52.231.65.108:8080/api/projects-select', true);
+                xhr2.open("POST", 'http://52.231.65.108:8080/projects-select', true);
                 xhr2.setRequestHeader('Access-Control-Allow-Origin', '*');
 				xhr2.setRequestHeader("Access-Control-Allow-Credentials", "true");
                 xhr2.setRequestHeader("Content-Type", "application/json");
                 xhr2.send(projectstring);
                 xhr2.onreadystatechange = function() {
 					if (xhr2.readyState == XMLHttpRequest.DONE) {
+                        location.replace('/filepage');
 							}
-						}	
+						}
                 /***todo***/
                 //location.replace('/coding');
       			}
