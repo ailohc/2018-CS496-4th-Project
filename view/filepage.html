@@ -7,29 +7,44 @@
 		<link rel="stylesheet" href="assets/css/main.css" />
 	</head>
 	<body class="is-preload">
-		<link rel="stylesheet" href="theme/yeti.css">
-		<link rel="stylesheet" href="lib/codemirror.css">
-		<link rel="stylesheet" href="addon/dialog/dialog.css">
-		<script src="assets/js/jquery.min.js"></script>
-		<script src="assets/js/browser.min.js"></script>
-		<script src="assets/js/breakpoints.min.js"></script>
-		<script src="assets/js/util.js"></script>
-		<script src="assets/js/main.js"></script>
-		<script src="theme/yeti.css"></script>
-		<script src="lib/codemirror.js"></script>
-		<script src="mode/clike/clike.js"></script>
-		<script src="addon/edit/matchbrackets.js"></script>
-		<script src="addon/edit/closebrackets.js"></script>
-		<script src="addon/dialog/dialog.js"></script>
-		<script src="addon/search/searchcursor.js"></script>
-		<script src="addon/search/search.js"></script>
-		<script src="addon/scroll/annotatescrollbar.js"></script>
-		<script src="addon/search/matchesonscrollbar.js"></script>
-		<script src="addon/search/jump-to-line.js"></script>
-		<script src="addon/search/match-highlighter.js"></script>
-		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+			<link rel="stylesheet" href="theme/yeti.css">
+			<link rel="stylesheet" href="lib/codemirror.css">
+			<link rel="stylesheet" href="addon/dialog/dialog.css">
+			<link rel="stylesheet" href="addon/hint/show-hint.css">
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="theme/yeti.css"></script>
+			<script src="lib/codemirror.js"></script>
+			<script src="mode/clike/clike.js"></script>
+			<script src="addon/display/fullscreen.js"></script>
+			<script src="addon/edit/matchbrackets.js"></script>
+			<script src="addon/edit/closebrackets.js"></script>
+			<script src="addon/hint/show-hint.js"></script>
+			<script src="addon/hint/anyword-hint.js"></script>
+			<script src="addon/dialog/dialog.js"></script>
+			<script src="addon/search/searchcursor.js"></script>
+			<script src="addon/search/search.js"></script>
+			<script src="addon/scroll/annotatescrollbar.js"></script>
+			<script src="addon/search/matchesonscrollbar.js"></script>
+			<script src="addon/search/jump-to-line.js"></script>
+			<script src="addon/search/match-highlighter.js"></script>
+			<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<style type="text/css">
-			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}
+			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
+			@media screen and (min-width: 1300px) {
+				article { max-width: 1000px; }
+				#nav { border-right: 499px solid transparent; }
+				}
+				span.clicky {
+				cursor: pointer;
+				background: #d70;
+				color: white;
+				padding: 0 3px;
+				border-radius: 3px;
+				}
 			.CodeMirror-focused .cm-matchhighlight {
 				background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
 				background-position: bottom;
@@ -37,17 +52,24 @@
 			}
 			.cm-matchhighlight {background-color: rgb(219, 221, 199)}
 			.CodeMirror-selection-highlight-scrollbar {background-color: rgb(212, 248, 212)}
+			.CodeMirror-fullscreen {
+				position: fixed;
+				top: 0; left: 0; right: 0; bottom: 0;
+				height: auto;
+				z-index: 9;
+				}
 			</style>
 			<div id="wrapper">
 				<header id="header">
 						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
-							  <li class="dropdown">
-								 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
-								 <div class="dropdown-content">
-									<a href="#">Log Out</a>								 </div>
-							  <li>
+								<li class="dropdown">
+										<a href="javascript:void(0)" class="dropbtn">My Editor</a>
+										<div class="dropdown-content">
+										   <a onclick="logout();">Log Out</a>
+										   </div>
+									 </li>
 						   </ul>
 						</nav>
 						<nav class="main">
@@ -59,46 +81,58 @@
 							</nav>
 						</header>
 	  
-					<section id="menu">
-							<section>
-									<ul class="links" id="filelinks">
-									</ul>
-								</section>
+						<section id="menu">
 								<section>
-									<ul class="actions stacked">
-										<li><a class="button large fit">Log Out</a></li>
-									</ul>
-								</section>
-	
-						</section>
+										<ul class="links" id="filelinks">
+										</ul>
+									</section>
+									<section>
+										<ul class="actions stacked">
+											<li><a class="button large fit" onclick="make_new_file();">new file</a></li>
+										</ul>
+									</section>
+		
+							</section>
 
 					<div id="main">
 						<section id="intro">
 									<header>
-										<p id="codename">codename</a></p>
+										<p id="codename"></a></p>
 									</header>
 						</section>
 						<form name = "code_form"><textarea id="code_text">
 							</textarea></form>
 							<p><button type="button" onclick="save_to_server();">Save</button>
-							<button type="button" onclick="btn_run_click();">Run</button>
+							<button type="button" onclick="compile_one_to_server();">Compile One</button>
+							<button type="button" onclick="compile_all_to_server();">Compile All</button>
+							<button type="button" onclick="run_to_server();">Run</button>
 							<h5>StdIn</h5>
 							<form class = "inputform" name = "std_inform"><textarea rows="2" id="std_in" name = "std_in"></textarea></form></p>
 							<h5>StdOut</h5>
 							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
 							  <script>
+								var user = "";
 								var array = "";
-								array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
+								var projectname = "";
 								//when loaded, get the file list
 								window.addEventListener('DOMContentLoaded', function(){ 
 										var xh = new XMLHttpRequest();
-										xh.open("GET", 'http://52.231.65.108:8080/api/files', true);
+										xh.open("GET", 'http://52.231.65.108:8080/project-get', true);
 										xh.send(null);
 										xh.onreadystatechange = function() {
 																if (xh.readyState == XMLHttpRequest.DONE) {
 																	var resultJSON = xh.response; 
 																	result_obj = JSON.parse(resultJSON);
-																	array = result_obj.projects;
+																	console.log(resultJSON);
+																	array = result_obj.files;
+																	user = result_obj.username;
+																	projectname = result_obj.projectname;
+																	Array.from(array, child => {
+                													var li = document.createElement("li");
+                													var text = document.createTextNode(child);
+                													li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3>";
+                													document.getElementById("filelinks").appendChild(li);
+                													});
 																}
 															}	
 									});
@@ -107,34 +141,53 @@
 										location.replace('/myprojects');
 									}
 									//code for coding area
-								var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
+									var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
 									matchBrackets: true,
 									autoCloseBrackets: true,
         							theme: "yeti",
 									mode: "text/x-scala",
-									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: true},
+									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: false},
+									tabSize: 4,
+									indentUnit: 4,
+									indentWithTabs: true,
 									onCursorActivity: function() {
     									editor.matchHighlight("CodeMirror-matchhighlight");
-									  }
+									  },
+									  extraKeys: {
+										"Ctrl-Space": "autocomplete",
+										"F11": function(cm) {
+										cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+										$("#header").hide();
+										$("#menu").hide();
+										},
+										"Esc": function(cm) {
+										if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+										$("#header").show();
+										$("#menu").show();
+										}
+									}
 								});
 								//generating list elements for file tree
-								array.forEach(function(item) {
-                				var li = document.createElement("li");
-                				var text = document.createTextNode(item);
-                				li.innerHTML = "<a onclick='link_click(this);' id="+item+">"+"<h3>"+item+"</h3>";
-                				document.getElementById("filelinks").appendChild(li);
-                				});
+								function refresh_file_tree(refresharray) {
+									Array.from(refresharray, child => {
+										var refresh_li = document.createElement("li");
+										var refresh_text = document.createTextNode(child);
+										refresh_li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3>";
+										document.getElementById("filelinks").appendChild(refresh_li);
+									});
+									
+								}
 								//when file name is clicked, get the code from the server
 								function link_click(element){
 									let selected = element.getAttribute('id');
 									console.log(selected);
 									document.getElementById("codename").innerText = selected+".scala";
-									var fileJSON = {"filename" : selected};
+									var fileJSON = {"projectname" : projectname, "filename" : selected};
 									var filestring = JSON.stringify(fileJSON);
 									console.log(filestring);
 									var xhr1 = new XMLHttpRequest();
-									xhr1.open("POST", 'http://52.231.65.108:8080/files/select', true);
+									xhr1.open("POST", 'http://52.231.65.108:8080/files-select', true);
 									xhr1.setRequestHeader('Access-Control-Allow-Origin', '*');
 									xhr1.setRequestHeader("Access-Control-Allow-Credentials", "true");
 									xhr1.setRequestHeader("Content-Type", "application/json");
@@ -144,12 +197,16 @@
 											var file_resultJSON = xhr1.response;
 											file_result_obj = JSON.parse(file_resultJSON);
 											editor.value = file_result_obj.code;
+											document.result_form.result_text.value = "";
+											document.std_inform.std_in.value = "";
 										}
 									}
 								}
+
 								//when the save button is clicked
 								function save_to_server() {
 									var savecode = editor.getValue();
+									if (document.getElementById("codename").innerText == "") {
 									swal({
 											text: 'Enter the Class Name',
 											content: "input",
@@ -160,12 +217,22 @@
 										})
 										.then(value => {
 											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
 											save_code_to_server(savecode, value);
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
 										})
+								} else {
+									var save_name = document.getElementById("codename").innerText;
+									save_code_to_server(savecode, save_name);
+									}
 								}
+								
 								//send code to server for saving
 								function save_code_to_server(savecode, saveclassname) {
-										var savecodeJSON = {"classname" : saveclassname, "code" : savecode};
+										var savecodeJSON = {"projectname" : projectname, "classname" : saveclassname, "code" : savecode};
 										var savecodestring = JSON.stringify(savecodeJSON);
 										console.log(savecodestring);
 										var save_xhr = new XMLHttpRequest();
@@ -176,15 +243,91 @@
 										save_xhr.send(savecodestring);
 										save_xhr.onreadystatechange = function() {
 											if (save_xhr.readyState == XMLHttpRequest.DONE) {
+												var save_result = save_xhr.response; 
+												save_result_obj = JSON.parse(save_result);
+												save_array = save_result_obj.filelist;
+												refresh_file_tree(save_array);
+												document.getElementById("codename").innerText = saveclassname;
 												swal('Saved!');
 											}
 										}	
 									}
+								function compile_one_to_server() {
+									document.result_form.result_text.value = "";
+									var compilecode = editor.getValue();
+									if (document.getElementById("codename").innerText == "") {
+									swal({
+											text: 'Enter the Class Name',
+											content: "input",
+											button: {
+												text: "Run",
+												closeModal: false,
+											},
+										})
+										.then(value => {
+											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
+											code_compile_one_to_server(compilecode, value);
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
+										})
+								} else {
+									var compile_name = document.getElementById("codename").innerText;
+									code_compile_one_to_server(compilecode, compile_name);
+									}	
+								}
+
+								function code_compile_one_to_server(compilecode, compileclassname) {
+									var compilecodeJSON = {"projectname" : projectname, "classname" : compileclassname, "code" : compilecode};
+										var compilecodestring = JSON.stringify(compilecodeJSON);
+										console.log(compilecodestring);
+										var xhr_compile = new XMLHttpRequest();
+										xhr_compile.open("POST", 'http://52.231.65.108:8080/compile-one', true);
+										xhr_compile.setRequestHeader('Access-Control-Allow-Origin', '*');
+										xhr_compile.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										xhr_compile.setRequestHeader("Content-Type", "application/json");
+										xhr_compile.send(compilecodestring);
+										xhr_compile.onreadystatechange = function() {
+											if (xhr_compile.readyState == XMLHttpRequest.DONE) {
+												var compileresultJSON = xhr_compile.response; 
+												compileresult_obj = JSON.parse(compileresultJSON);
+												document.result_form.result_text.value = compileresult_obj.output;
+												compile_array = compileresult_obj.filelist;
+												refresh_file_tree(compile_array);
+												document.getElementById("codename").innerText = compileclassname;
+											}
+										}	
+
+								}
+
+								function compile_all_to_server() {
+									document.result_form.result_text.value = "";
+									var compileallcodeJSON = {"projectname" : projectname};
+									var compileallcodestring = JSON.stringify(compileallcodeJSON);
+									console.log(compileallcodestring);
+									var xhr_all_compile = new XMLHttpRequest();
+									xhr_all_compile.open("POST", 'http://52.231.65.108:8080/compile-all', true);
+									xhr_all_compile.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr_all_compile.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr_all_compile.setRequestHeader("Content-Type", "application/json");
+									xhr_all_compile.send(compileallcodestring);
+									xhr_all_compile.onreadystatechange = function() {
+										var compileallresultJSON = xhr_all_compile.response;
+										compileallresult_obj = JSON.parse(compileallresultJSON);
+										document.result_form.result_text.value = compileallresult_obj.output;
+										compile_all_array = compileallresult_obj.filelist;
+										refresh_file_tree(compile_all_array);
+									}
+								}
+
 								//when the run button is clicked
-								function btn_run_click(){
+								function run_to_server(){
 										document.result_form.result_text.value = "";
 										var std_input = document.std_inform.std_in.value;
 										var codestring = editor.getValue();
+										if (document.getElementById("codename").innerText == "") {
 										swal({
 											text: 'Enter the Class Name',
 											content: "input",
@@ -195,17 +338,26 @@
 										})
 										.then(value => {
 											if (!value) throw null;
+											if (array.indexOf(value)===-1) {
 											run_code_to_server(codestring, value, std_input);
-											swal('Go!');
+											}
+											else {
+												swal('Duplicate directory name exists!');
+											}
 										})
-      								}
+      								} else {
+										  run_name = document.getElementById("codename").innerText;
+										  run_code_to_server(codestring, run_name, std_input);
+									  }
+									  
+									}
 									//send code to server for compiling
 									function run_code_to_server(codestring, class_name, std_input) {
-										var codeJSON = {"classname" : class_name, "code" : codestring, "input" : std_input};
+										var codeJSON = {"projectname" : projectname, "classname" : class_name, "code" : codestring, "input" : std_input};
 										var codestring = JSON.stringify(codeJSON);
 										console.log(codestring);
 										var xhr = new XMLHttpRequest();
-										xhr.open("POST", 'http://52.231.65.108:8080/api/run', true);
+										xhr.open("POST", 'http://52.231.65.108:8080/run', true);
 										xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
 										xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
 										xhr.setRequestHeader("Content-Type", "application/json");
@@ -215,12 +367,31 @@
 												var resultJSON = xhr.response; 
 												result_obj = JSON.parse(resultJSON);
 												document.result_form.result_text.value = result_obj.output;
+												run_array = result_obj.filelist;
+												refresh_file_tree(run_array);
+												document.getElementById("codename").innerText = class_name;
 											}
 										}	
 									}
+
+									function make_new_file() {
+										console.log("new file request");
+										document.result_form.result_text.value = "";
+										document.std_inform.std_in.value = "";
+										document.getElementById("codename").innerText = "";
+										editor.value = "";
+										//window.location.reload(true);	
+									}
+									function logout() {
+										console.log("logout request");
+										var log_out = new XMLHttpRequest();
+										log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
+										log_out.send(null);
+
+									}
 								
 							  </script>
-			</div>
+					</div>
 			<script src="assets/js/jquery.min.js"></script>
 			<script src="assets/js/browser.min.js"></script>
 			<script src="assets/js/breakpoints.min.js"></script>

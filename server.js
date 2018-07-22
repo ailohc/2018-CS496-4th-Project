@@ -3,25 +3,13 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const bodyParser = require('body-parser');
-const child_process = require('child_process');
-const fs = require('fs');
 const session = require('express-session');
 //for mongodb
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let User;
-let Project;
-
-const projectSchema = new Schema({
-  user_id: String,
-  projectname: String,
-  files: [{
-    filename: String,
-    code: String
-  }]
-})
-Project = mongoose.model('Project', projectSchema);
+let Scalafile;
 
 const userSchema = new Schema({
   user_id: String,
@@ -29,6 +17,15 @@ const userSchema = new Schema({
   projectnames: [String]
 });
 User = mongoose.model('User', userSchema);
+
+const scalafileSchema = new Schema({
+  user_id: String,
+  projectname: String,
+  classname: String,
+  srcfile: Buffer,
+  classfile: Buffer
+});
+Scalafile = mongoose.model('Scalafile', scalafileSchema);
 
 const db = mongoose.connection;
 db.on('error',console.error);
@@ -53,9 +50,10 @@ app.get('/', (req, res) => {
   res.render('login.html');
 });
 
-require('./routes/run_server.js')(app, User, Project);
-require('./routes/home_server.js')(app, User);
-require('./routes/coding_server.js')(app, User, Project);
+require('./routes/sign_server.js')(app, User, Scalafile);
+require('./routes/projectpage_server.js')(app, User, Scalafile);
+require('./routes/filepage_server.js')(app, User, Scalafile);
+require('./routes/code_manager_server.js')(app, User, Scalafile);
 
 http.listen(8080, () => {
   console.log('Server running at 52.231.65.108:8080');

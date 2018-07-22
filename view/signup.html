@@ -22,7 +22,7 @@
 									<a href="signin.html">Sign In</a>
 									<a href="signup.html">Sign Up</a>
 								 </div>
-							  <li>
+							  </li>
 						   </ul>
 						</nav>
 					 </header>
@@ -30,10 +30,10 @@
 			<section>
 					<form>
 							<h2>Sign Up</h2>
-							<h7>username:<input type="text" name="username" /><sapn id="note1"></sapn><br /></h7>
-							<h7>password:<input type="password" name="password" value=""/><span id="note2"></span><br /></h7>
-							<h7>check password:<input type="password" name="chkpasswd" value="" onblur="checkpw(this.form)" /><span id="note3"></span><br /></h7>
-							<input type="button" value="Sign in" onclick="register(this.form)" />
+							<h7>username:<input type="text" name="username" /></h7><h10><sapn id="note1"></sapn><br /></h10>
+							<h7>password:<input type="password" name="password" value=""/></h7><h10><span id="note2"></span><br /></h10>
+							<h7>check password:<input type="password" name="chkpasswd" value="" onblur="checkpw(this.form)" /></h7><h10><span id="note3"></span><br /></h10>
+							<input type="button" value="Sign Up" onclick="register(this.form)" />
 							<p id="check"></p>
 					</form>
 					<h7>Already have an account? </h7>
@@ -65,14 +65,19 @@
 				}
 				function register(form){
 					if(form.username.value == ""){
-						id("note1").textContent="please enter the username";
+						id("note1").textContent="please enter username";
+						form.username.focus();
+						return;
+					}
+					else if (form.username.value.includes("/")) {
+						id("note1").textContent="special characters not allowed in username";
 						form.username.focus();
 						return;
 					}
 					else
 						id("note1").textContent="";
 					if(form.password.value == ""){
-						id("note2").textContent="please enter the password";
+						id("note2").textContent="please enter password";
 						form.password.focus();
 						return;
 					}
