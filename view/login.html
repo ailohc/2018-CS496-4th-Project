@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 	</head>
-	<body class="single is-preload">
+	<body class="single is-preload" onload="getDropDownContents()">
 
 		<!-- Wrapper -->
 			<div id="wrapper">
@@ -16,11 +16,11 @@
 					<h1><a href="login.html">Scala Editor</a></h1>
 					<nav class="links">
 					   <ul>
-						  <li class="dropdown">
-							 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
-							 <div class="dropdown-content">
-								<a href="signin.html">Sign In</a>
-								<a href="signup.html">Sign Up</a>
+					   	 	<li><a id="myprojects" href="signin.html">My Projects</a></li>
+						 	<li class="dropdown">
+							 <a href="javascript:void(0)" class="dropbtn">My Account</a>
+							 <div id="accountdropdown" class="dropdown-content">
+								<!--dropdown content here-->
 							 </div>
 						  </li>
 					   </ul>
@@ -44,6 +44,30 @@
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script type="text/javascript">
+				function getDropDownContents() {
+					var myAccount = document.createElement("div");
+					myAccount.innerHTML="";
+					var ajax=new XMLHttpRequest();
+					ajax.open("GET", 'http://52.231.65.108:8080/isloggedin', true);
+					ajax.send(null);
+					ajax.onreadystatechange = function(){
+						var resultJSON = ajax.response;
+						var result_obj = JSON.parse(resultJSON);
+						var check = result_obj.isloggedin;
+						if(check){
+						  myAccount.innerHTML = "<a>Sign Out</a>"
+						  document.getElementById("accountdropdown").appendChild(myAccount);
+						  document.getElementById("myprojects").href="projectpage.html";
+						}
+						else{
+					 		myAccount.innerHTML = "<a href=\"signin.html\">Sign In</a><a href=\"signup.html\">Sign Up</a>"
+							document.getElementById("accountdropdown").appendChild(myAccount);
+					 		document.getElementById("myprojects").href="signin.html";
+						}
+					}
+				}
+			</script>
 
 	</body>
 </html>

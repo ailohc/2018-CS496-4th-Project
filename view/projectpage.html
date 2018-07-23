@@ -117,7 +117,7 @@
             }
             //for rendering - go back to the filepage
             function go_to_filepage() {
-				location.replace('/myprojects');
+				location.href = '/myprojects';
 			}
             //array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
             //creating list elements on the page
@@ -137,7 +137,7 @@
                 xhr2.send(projectstring);
                 xhr2.onreadystatechange = function() {
 					if (xhr2.readyState == XMLHttpRequest.DONE) {
-                        location.replace('/filepage');
+                        location.href = '/filepage';
 							}
 						}
                 /***todo***/

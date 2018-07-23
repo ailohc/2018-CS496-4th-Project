@@ -159,7 +159,7 @@
 									});
 									//for rendering - go back to the filepage
 									function go_to_filepage() {
-										location.replace('/myprojects');
+										location.href = '/myprojects';
 									}
 									
 								
@@ -204,7 +204,10 @@
 									});
 								//generating list elements for file tree
 								function refresh_file_tree(refresharray) {
-									document.getElementById("filelinks") = "";
+									//document.getElementById("filelinks") = "";
+									document.getElementById("filelinks").innerHTML = "";
+									console.log(refresharray);
+									console.log("refressssh");
 									Array.from(refresharray, child => {
 										var refresh_li = document.createElement("li");
 										var refresh_text = document.createTextNode(child);
@@ -250,8 +253,8 @@
 											text: 'Enter the Class Name',
 											content: "input",
 											button: {
-												text: "Run",
-												closeModal: false,
+												text: "Save",
+												closeModal: true,
 											},
 										})
 										.then(value => {
@@ -308,8 +311,8 @@
 											text: 'Enter the Class Name',
 											content: "input",
 											button: {
-												text: "Run",
-												closeModal: false,
+												text: "Compile",
+												closeModal: true,
 											},
 										})
 										.then(value => {
@@ -342,7 +345,13 @@
 												var compileresultJSON = xhr_compile.response; 
 												compileresult_obj = JSON.parse(compileresultJSON);
 												console.log(compileresultJSON);
-												document.result_form.result_text.value = compileresult_obj.output;
+												if (compileresult_obj.output == undefined){
+													swal("Compile Success!");
+													}
+												else {
+													swal ("Compile Failed!");
+													document.result_form.result_text.value = compileresult_obj.output;
+													}
 												compile_array = compileresult_obj.filelist;
 												refresh_file_tree(compile_array);
 												document.getElementById("codename").innerText = compileclassname;
@@ -382,7 +391,7 @@
 											content: "input",
 											button: {
 												text: "Run",
-												closeModal: false,
+												closeModal: true,
 											},
 										})
 										.then(value => {
@@ -403,7 +412,7 @@
 									}
 									//send code to server for compiling
 									function run_code_to_server(codestring, class_name, std_input) {
-										var codeJSON = {"projectname" : project_name, "classname" : class_name, "code" : codestring, "input" : std_input};
+										var codeJSON = {"projectname" : project_name, "classname" : class_name, "input" : std_input};
 										var codestring = JSON.stringify(codeJSON);
 										console.log(codestring);
 										var xhr = new XMLHttpRequest();
@@ -440,8 +449,8 @@
 												text: 'Enter the file Name',
 												content: "input",
 												button: {
-													text: "Run",
-													closeModal: false,
+													text: "Save",
+													closeModal: true,
 												},
 											})
 											.then(value => {

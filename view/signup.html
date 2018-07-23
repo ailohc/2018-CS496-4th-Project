@@ -97,12 +97,11 @@
 						var resultJSON = ajax.response;
 						var result_obj = JSON.parse(resultJSON);
 						var check = result_obj.success;
-						//NEED TO CHANGE
 						if(check == 1){
 							id("check").textContent="this id has been used";
 							return;
 						}
-						else if (check ==0){
+						else if (check == 0){
 							id("check").textContent="...error";
 							return;
 						} else {
