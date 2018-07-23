@@ -2,11 +2,12 @@
 <html>
 	<head>
 		<title>Scala Editor</title>
+		<link rel='icon' href="https://www.scala-lang.org/resources/img/frontpage/scala-spiral.png">
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
 	</head>
-	<body class="single is-preload">
+	<body class="single is-preload" onload="getDropDownContents()">
 
 		<!-- Wrapper -->
 			<div id="wrapper">
@@ -16,11 +17,11 @@
 					<h1><a href="login.html">Scala Editor</a></h1>
 					<nav class="links">
 					   <ul>
-						  <li class="dropdown">
-							 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
-							 <div class="dropdown-content">
-								<a href="signin.html">Sign In</a>
-								<a href="signup.html">Sign Up</a>
+					   	 	<li><a id="myprojects" href="signin.html">My Projects</a></li>
+						 	<li class="dropdown">
+							 <a href="javascript:void(0)" class="dropbtn">My Account</a>
+							 <div id="accountdropdown" class="dropdown-content">
+								<!--dropdown content here-->
 							 </div>
 						  </li>
 					   </ul>
@@ -30,7 +31,7 @@
 
 			<section class="hero">
   				<div class="hero-content">
-			    <h8>My Scala Editor</h8>
+			    <a id="myscalaeditor" href="signin.html"><h8>My Scala Editor</h8></a>
 			    </div>
 			    <div class="hero-content">
 			    <h9>With Scala Editor, you can access and edit your code on any computer with internet.</h9>
@@ -38,12 +39,85 @@
 			</section>
 
 
+			 <main>
+			    <div class="container">
+
+			  <section class="contained">
+
+			        <div class="bg-clip">
+			          <a href="https://www.scala-lang.org/">Scala</a>
+			          <span>The Official Scala Page</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://docs.scala-lang.org/tutorials/">Scala Documentation</a>
+			          <span>The Official Scala Documentation</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://www.tutorialspoint.com/scala/">tutorialspoint</a>
+			          <span>Scala Tutorial Page</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://www.coursera.org/learn/progfun1">Coursera</a>
+			          <span>Scala Tutorial Page</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://programmers.co.kr/learn/courses/12">Programmers</a>
+			          <span>Scala Tutorial Page</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://medium.com/quick-code/top-tutorials-to-learn-scala-3a221bf4ef85">Udemy</a>
+			          <span>Top 10 Scala Udemy Courses</span>
+			        </div>
+			        <div class="bg-clip">
+			          <a href="https://www.javatpoint.com/scala-tutorial">javaTpoint</a>
+			          <span>javaTpoint</span>
+			        </div>
+			  </section>
+
+			</div>
+			   </div>
+			  </main>
+
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>
 			<script src="assets/js/browser.min.js"></script>
 			<script src="assets/js/breakpoints.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script type="text/javascript">
+				function getDropDownContents() {
+					var myAccount = document.createElement("div");
+					myAccount.innerHTML="";
+					var ajax=new XMLHttpRequest();
+					ajax.open("GET", 'http://52.231.65.108:8080/isloggedin', true);
+					ajax.send(null);
+					ajax.onreadystatechange = function(){
+						var resultJSON = ajax.response;
+						var result_obj = JSON.parse(resultJSON);
+						var check = result_obj.isloggedin;
+						if(check){
+						  myAccount.innerHTML = "<a onclick='logout();'>Sign Out</a>"
+						  document.getElementById("accountdropdown").appendChild(myAccount);
+						  document.getElementById("myprojects").href="projectpage.html";
+						  document.getElementById("myscalaeditor").href="projectpage.html";
+						}
+						else{
+					 		myAccount.innerHTML = "<a href=\"signin.html\">Sign In</a><a href=\"signup.html\">Sign Up</a>"
+							document.getElementById("accountdropdown").appendChild(myAccount);
+					 		document.getElementById("myprojects").href="signin.html";
+					 		document.getElementById("myscalaeditor").href="signin.html";
+						}
+					}
+				}
+
+				 function logout() {
+                              console.log("logout request");
+                              var log_out = new XMLHttpRequest();
+                              log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
+                              log_out.send(null);
+                              location.href = '/home';
+                           }
+			</script>
 
 	</body>
 </html>

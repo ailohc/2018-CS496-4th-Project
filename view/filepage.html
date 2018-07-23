@@ -31,7 +31,9 @@
 			<script src="addon/search/matchesonscrollbar.js"></script>
 			<script src="addon/search/jump-to-line.js"></script>
 			<script src="addon/search/match-highlighter.js"></script>
+			<script src="addon/effect/code-blast.js"></script>
 			<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+			<script type="text/javascript" src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.js" ></script>
 		<style type="text/css">
 			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
 			@media screen and (min-width: 1300px) {
@@ -61,11 +63,11 @@
 			</style>
 			<div id="wrapper">
 				<header id="header">
-						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
+						<h1><a onclick="go_to_homepage();">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
 								<li class="dropdown">
-										<a href="javascript:void(0)" class="dropbtn">My Editor</a>
+										<a href="javascript:void(0)" class="dropbtn">My Account</a>
 										<div class="dropdown-content">
 										   <a onclick="logout();">Log Out</a>
 										   </div>
@@ -95,14 +97,14 @@
 							</section>
 
 					<div id="main">
-						<section id="intro">
-									<header>
-										<p id="codename"></a></p>
-									</header>
-						</section>
+										<h11><p id="codename"></p></h11>
+
 						<form name = "code_form"><textarea id="code_text">
 							</textarea></form>
-							<p><button type="button" onclick="save_to_server();">Save</button>
+
+							<p>
+									<button type="button" onclick="save_to_local();">Download</button>
+								<button type="button" onclick="save_to_server();">Save</button>
 							<button type="button" onclick="compile_one_to_server();">Compile One</button>
 							<button type="button" onclick="compile_all_to_server();">Compile All</button>
 							<button type="button" onclick="run_to_server();">Run</button>
@@ -110,10 +112,29 @@
 							<form class = "inputform" name = "std_inform"><textarea rows="2" id="std_in" name = "std_in"></textarea></form></p>
 							<h5>StdOut</h5>
 							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
+							<h5>Google</h5>
+							<div>
+								<form method="get" action="http://www.google.com/search" target="_blank"> 
+									<input id="google" type="text" name="query" class="searchField"/>
+									<br />
+									<input type="submit" value="search" class="searchSubmit"/>
+								</form>
+							</div>
+							<h5>Stack Overflow</h5>
+							<div>
+								<form method="get" action="https://stackoverflow.com/search" target="_blank"> 
+									<input id="stackoverflow" type="text" name="q" class="searchField" />
+									<br />
+									<input type="submit" value="search" class="searchSubmit"/>
+								</form>
+							</div>
 							  <script>
 								var user = "";
 								var array = "";
-								var projectname = "";
+								var project_name = "";
+
+								//document.getElementById("google").value = "";
+								//document.getElementById("stackoverflow").value = "";
 								//when loaded, get the file list
 								window.addEventListener('DOMContentLoaded', function(){ 
 										var xh = new XMLHttpRequest();
@@ -123,10 +144,10 @@
 																if (xh.readyState == XMLHttpRequest.DONE) {
 																	var resultJSON = xh.response; 
 																	result_obj = JSON.parse(resultJSON);
-																	console.log(resultJSON);
+																	//console.log(resultJSON);
 																	array = result_obj.files;
 																	user = result_obj.username;
-																	projectname = result_obj.projectname;
+																	project_name = result_obj.projectname;
 																	Array.from(array, child => {
                 													var li = document.createElement("li");
                 													var text = document.createTextNode(child);
@@ -137,9 +158,11 @@
 															}	
 									});
 									//for rendering - go back to the filepage
-									function go_to_filepage() {
-										location.replace('/myprojects');
+									function go_to_homepage() {
+										location.href = '/home';
 									}
+									
+								
 									//code for coding area
 									var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
@@ -168,8 +191,30 @@
 										}
 									}
 								});
+								$(document).keydown(function(event) {
+									var key = undefined;
+    								var possible = [ event.key, event.keyIdentifier, event.keyCode, event.which ];
+									while (key === undefined && possible.length > 0){
+										key = possible.pop();
+									}
+									if (event.keyCode == '117') {
+										editor.getDoc().setValue("object {\n\tdef main(args: Array[String]) {\n\t\t\n\t}\n}");
+									}
+									else if (event.keyCode == '118') {
+										editor.getDoc().setValue("def {\n\n}");
+									}
+									else if (key && (key == '115' || key == '83' ) && (event.ctrlKey || event.metaKey) && !(event.altKey)) {
+										event.preventDefault();
+										console.log("saveeeee");
+										save_to_server();
+									}
+								});
 								//generating list elements for file tree
 								function refresh_file_tree(refresharray) {
+									//document.getElementById("filelinks") = "";
+									document.getElementById("filelinks").innerHTML = "";
+									console.log(refresharray);
+									console.log("refressssh");
 									Array.from(refresharray, child => {
 										var refresh_li = document.createElement("li");
 										var refresh_text = document.createTextNode(child);
@@ -182,8 +227,8 @@
 								function link_click(element){
 									let selected = element.getAttribute('id');
 									console.log(selected);
-									document.getElementById("codename").innerText = selected+".scala";
-									var fileJSON = {"projectname" : projectname, "filename" : selected};
+									document.getElementById("codename").innerText = selected;
+									var fileJSON = {"projectname" : project_name, "filename" : selected};
 									var filestring = JSON.stringify(fileJSON);
 									console.log(filestring);
 									var xhr1 = new XMLHttpRequest();
@@ -196,9 +241,13 @@
 										if (xhr1.readyState == XMLHttpRequest.DONE) {
 											var file_resultJSON = xhr1.response;
 											file_result_obj = JSON.parse(file_resultJSON);
-											editor.value = file_result_obj.code;
+											if (file_result_obj.success){
+											editor.getDoc().setValue(file_result_obj.code);
 											document.result_form.result_text.value = "";
 											document.std_inform.std_in.value = "";
+											} else {
+												swal("Fail to Load from Server!");
+											}
 										}
 									}
 								}
@@ -211,8 +260,8 @@
 											text: 'Enter the Class Name',
 											content: "input",
 											button: {
-												text: "Run",
-												closeModal: false,
+												text: "Save",
+												closeModal: true,
 											},
 										})
 										.then(value => {
@@ -221,7 +270,7 @@
 											save_code_to_server(savecode, value);
 											}
 											else {
-												swal('Duplicate directory name exists!');
+												swal('Duplicate file name exists!');
 											}
 										})
 								} else {
@@ -232,8 +281,9 @@
 								
 								//send code to server for saving
 								function save_code_to_server(savecode, saveclassname) {
-										var savecodeJSON = {"projectname" : projectname, "classname" : saveclassname, "code" : savecode};
+										var savecodeJSON = {"projectname" : project_name, "classname" : saveclassname, "code" : savecode};
 										var savecodestring = JSON.stringify(savecodeJSON);
+										var save_array = [];
 										console.log(savecodestring);
 										var save_xhr = new XMLHttpRequest();
 										save_xhr.open("POST", 'http://52.231.65.108:8080/save', true);
@@ -245,10 +295,18 @@
 											if (save_xhr.readyState == XMLHttpRequest.DONE) {
 												var save_result = save_xhr.response; 
 												save_result_obj = JSON.parse(save_result);
+												console.log(save_result_obj);
+												if (save_result_obj.success) {
 												save_array = save_result_obj.filelist;
+												console.log(save_array+"saved files!");
+												console.log(save_array[0]);
 												refresh_file_tree(save_array);
 												document.getElementById("codename").innerText = saveclassname;
 												swal('Saved!');
+												}
+												else {
+													swal('Fail to Load from Server!');
+												}
 											}
 										}	
 									}
@@ -260,8 +318,8 @@
 											text: 'Enter the Class Name',
 											content: "input",
 											button: {
-												text: "Run",
-												closeModal: false,
+												text: "Compile",
+												closeModal: true,
 											},
 										})
 										.then(value => {
@@ -270,7 +328,7 @@
 											code_compile_one_to_server(compilecode, value);
 											}
 											else {
-												swal('Duplicate directory name exists!');
+												swal('Duplicate file name exists!');
 											}
 										})
 								} else {
@@ -280,7 +338,7 @@
 								}
 
 								function code_compile_one_to_server(compilecode, compileclassname) {
-									var compilecodeJSON = {"projectname" : projectname, "classname" : compileclassname, "code" : compilecode};
+									var compilecodeJSON = {"projectname" : project_name, "classname" : compileclassname, "code" : compilecode};
 										var compilecodestring = JSON.stringify(compilecodeJSON);
 										console.log(compilecodestring);
 										var xhr_compile = new XMLHttpRequest();
@@ -293,7 +351,18 @@
 											if (xhr_compile.readyState == XMLHttpRequest.DONE) {
 												var compileresultJSON = xhr_compile.response; 
 												compileresult_obj = JSON.parse(compileresultJSON);
-												document.result_form.result_text.value = compileresult_obj.output;
+												console.log(compileresultJSON);
+												if (compileresult_obj.output == ""){
+													swal("Compile Success!");
+													document.getElementById("google").value = "";
+													document.getElementById("stackoverflow").value = "";
+													}
+												else {
+													swal ("Compile Failed!");
+													document.result_form.result_text.value = compileresult_obj.output;
+													document.getElementById("google").value = compileresult_obj.output;
+													document.getElementById("stackoverflow").value = compileresult_obj.output;
+													}
 												compile_array = compileresult_obj.filelist;
 												refresh_file_tree(compile_array);
 												document.getElementById("codename").innerText = compileclassname;
@@ -304,7 +373,7 @@
 
 								function compile_all_to_server() {
 									document.result_form.result_text.value = "";
-									var compileallcodeJSON = {"projectname" : projectname};
+									var compileallcodeJSON = {"projectname" : project_name};
 									var compileallcodestring = JSON.stringify(compileallcodeJSON);
 									console.log(compileallcodestring);
 									var xhr_all_compile = new XMLHttpRequest();
@@ -333,16 +402,17 @@
 											content: "input",
 											button: {
 												text: "Run",
-												closeModal: false,
+												closeModal: true,
 											},
 										})
 										.then(value => {
 											if (!value) throw null;
 											if (array.indexOf(value)===-1) {
 											run_code_to_server(codestring, value, std_input);
+											swal('Go!');
 											}
 											else {
-												swal('Duplicate directory name exists!');
+												swal('Duplicate file name exists!');
 											}
 										})
       								} else {
@@ -353,7 +423,7 @@
 									}
 									//send code to server for compiling
 									function run_code_to_server(codestring, class_name, std_input) {
-										var codeJSON = {"projectname" : projectname, "classname" : class_name, "code" : codestring, "input" : std_input};
+										var codeJSON = {"projectname" : project_name, "classname" : class_name, "input" : std_input};
 										var codestring = JSON.stringify(codeJSON);
 										console.log(codestring);
 										var xhr = new XMLHttpRequest();
@@ -365,7 +435,24 @@
 										xhr.onreadystatechange = function() {
 											if (xhr.readyState == XMLHttpRequest.DONE) {
 												var resultJSON = xhr.response; 
+												console.log(resultJSON);
 												result_obj = JSON.parse(resultJSON);
+												if (result_obj.success === 0) {
+													swal("Failed to run!");
+												}
+												else if (result_obj.success === 1) {
+													swal("Runtime Error Occured!");
+													var errorstring = result_obj.output.split("\n");
+													errortoken = errorstring[0];
+													console.log(errortoken);
+													document.getElementById("google").value = result_obj.output;
+													document.getElementById("stackoverflow").value = result_obj.output;
+												}
+												else {
+													swal("Great!")
+													document.getElementById("google").value = "";
+													document.getElementById("stackoverflow").value = "";
+												}
 												document.result_form.result_text.value = result_obj.output;
 												run_array = result_obj.filelist;
 												refresh_file_tree(run_array);
@@ -379,15 +466,49 @@
 										document.result_form.result_text.value = "";
 										document.std_inform.std_in.value = "";
 										document.getElementById("codename").innerText = "";
-										editor.value = "";
+										editor.getDoc().setValue("");
+										document.getElementById("google").value = "";
+										document.getElementById("stackoverflow").value = "";
 										//window.location.reload(true);	
 									}
+
+									function save_to_local() {
+										var localcode = editor.getValue();
+										if (document.getElementById("codename").innerText == "") {
+												swal({
+												text: 'Enter the file Name',
+												content: "input",
+												button: {
+													text: "Save",
+													closeModal: true,
+												},
+											})
+											.then(value => {
+												if (!value) throw null;
+												save_code_to_local(localcode, value);
+											})
+										}
+										else {
+											save_code_to_local(localcode, document.getElementById("codename").innerText);
+										}
+									}
+
+									function save_code_to_local (local_code, local_code_name) {
+										var content = local_code;
+										var filename = local_code_name+".scala";
+										var blob = new Blob([content], {
+											type: "text/plain;charset=utf-8"
+										});
+										saveAs(blob, filename);
+									}
+
+
 									function logout() {
 										console.log("logout request");
 										var log_out = new XMLHttpRequest();
 										log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
 										log_out.send(null);
-
+										location.href = '/home';
 									}
 								
 							  </script>

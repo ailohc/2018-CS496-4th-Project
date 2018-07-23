@@ -4,7 +4,7 @@ module.exports = (app, User, Scalafile) => {
   const child_process = require('child_process');
 
   app.post('/save', (req, res) => {
-    console.log('/save request!');
+    console.log('/save request!' + req.body.classname);
     let passdata = {user_id: req.session.user_id,
                       projectname: req.body.projectname,
                       classname: req.body.classname,
@@ -12,8 +12,8 @@ module.exports = (app, User, Scalafile) => {
     rmv_dir(passdata)
     .then(mk_dir)
     .then(save_src)
+    //.then(rmv_dir)
     .then(find_filelist)
-    .then(rmv_dir)
     .then((filelist) => {
       console.log('below is filelist:')
       console.log(filelist);
@@ -30,13 +30,15 @@ module.exports = (app, User, Scalafile) => {
   app.post('/compile-one', (req, res) => {
     console.log('/compile-one request!');
     let passdata = {user_id: req.session.user_id,
-      projectname: req.body.projectname,
-      classname: req.body.classname,
-      code: req.body.code};
+                    projectname: req.body.projectname,
+                    classname: req.body.classname,
+                    code: req.body.code};
     rmv_dir(passdata)
     .then(mk_dir)
     .then(save_src)
-    .then(compile_one)
+    .then(rmv_dir)
+    .then(download_srcfile)
+    //.then(compile_singlefile)
     //.then(rmv_dir)
     .then((filelist) => {
       console.log('below is filelist:')
@@ -49,7 +51,24 @@ module.exports = (app, User, Scalafile) => {
     });
   });
 
-  function compile_one(passdata) {
+  //TODO
+  /*
+  app.post('/compile-all', (req, res) => {
+    console.log('/compile-all request!');
+    let passdata = {user_id: req.session.user_id,
+                    projectname: req.body.projectname,
+                    classname: req.body.classname,
+                    code: req.body.code};
+    rmv_dir(passdata)
+    .then(mk_dir)
+    .then((passdata) => {
+      return new Promise((resolve, reject) => {
+        for ()
+      })
+    })
+  }) */
+
+  function download_srcfile(passdata) {
     return new Promise((resolve, reject) => {
       let user_id = passdata.user_id;
       let projectname = passdata.projectname;
@@ -64,50 +83,61 @@ module.exports = (app, User, Scalafile) => {
       }, (err, scalafile) => {
         if (err) {
           console.log(err);
-          reject('compile_one scalafile.findone');
+          reject('download_srcfile scalafile.findone');
         } else if (scalafile) {
           let filePath = `${dirPath}/${classname}.scala`
           fs.writeFile(filePath, scalafile.srcfile, 'binary', (err) => {
             if (err) {
               console.log(err);
-              reject('compile_one fs.writefile');
+              reject('download_srcfile fs.writefile');
             } else {
-              child_process.exec(`scalac -cp ${dirPath} ${filePath}`, (err) => {
+              passdata.scalafile = scalafile;
+              resolve(passdata);
+            }
+          });
+        } else {
+          reject('download_srcfile srcfile not found');
+        }
+      });
+    });
+  }
+
+  function compile_singlefile(passdata) {
+    return new Promise((resolve, reject) => {
+      let user_id = passdata.user_id;
+      let classname = passdata.classname;
+      let scalafile = passdata.scalafile;
+      let dirPath = getDirPath(user_id);
+      let filePath = `${dirPath}/${classname}.scala`
+      child_process.exec(`scalac -cp ${dirPath} ${filePath}`, (err) => {
+        if (err) {
+          console.log(err);
+          reject('compile_singlefile child_process.exec scalac');
+        } else {
+          scalafile.classfile = fs.readfile(filePath, (err) => {
+            if (err) {
+              console.log(err);
+              reject('compile_singlefile fs.readfile to upload to db');
+            } else {
+              scalafile.save((err) => {
                 if (err) {
                   console.log(err);
-                  reject('compile_one child_process.exec scalac');
+                  reject('compile_singlefile scalafile.save');
                 } else {
-                  scalafile.classfile = fs.readfile(filePath, (err) => {
-                    if (err) {
-                      console.log(err);
-                      reject('compile_one fs.readfile to upload to db');
-                    } else {
-                      scalafile.save((err) => {
-                        if (err) {
-                          console.log(err);
-                          reject('compile_one scalafile.save');
-                        } else {
-                          resolve(passdata);
-                        }
-                      }); //scalafile.save
-                    }
-                  }); //fs.readfile : updload classfile to db
+                  resolve(passdata);
                 }
-              }); //child_process.exec scalac
+              }); //scalafile.save
             }
-          }); //fs.writefile : download srcfile from db
-        } else {
-          reject('compile_one srcfile not saved'); //unlikely to happen
+          }); //fs.readfile : updload classfile to db
         }
-      });  //scalafile.findone
-    }); //return new promise
+      }); //child_process.exec scalac
+    });
   }
 
   function find_filelist(passdata) {
     return new Promise((resolve, reject) => {
       let user_id = passdata.user_id;
       let projectname = passdata.projectname;
-      let classname = passdata.classname;
       Scalafile.find({
         $and: [
         {user_id: user_id},
@@ -123,6 +153,7 @@ module.exports = (app, User, Scalafile) => {
         } else {
           let files = new Array();
           for (let i=0; i<scalafiles.length; i++) {
+              console.log(scalafiles[i].classname);
               files.push(scalafiles[i].classname);
           }
           resolve(files);
@@ -176,7 +207,7 @@ module.exports = (app, User, Scalafile) => {
       console.log('save_src');
       let user_id = passdata.user_id;
       let projectname = passdata.projectname;
-      let classname = passdata.projectname;
+      let classname = passdata.classname;
       let code = passdata.code;
       let dirPath = getDirPath(user_id, projectname);
       fs.writeFile(`${dirPath}/${classname}.scala`, code, 'utf-8', (err) => {
@@ -232,5 +263,58 @@ module.exports = (app, User, Scalafile) => {
     return `usertemp/${user_id}`;
   }
 
+  function compile_one(passdata) {
+    return new Promise((resolve, reject) => {
+      let user_id = passdata.user_id;
+      let projectname = passdata.projectname;
+      let classname = passdata.classname;
+      let dirPath = getDirPath(user_id);
+      Scalafile.findOne({
+        $and: [
+        {user_id: user_id},
+        {projectname: projectname},
+        {classname: classname}
+        ]
+      }, (err, scalafile) => {
+        if (err) {
+          console.log(err);
+          reject('compile_one scalafile.findone');
+        } else if (scalafile) {
+          let filePath = `${dirPath}/${classname}.scala`
+          fs.writeFile(filePath, scalafile.srcfile, 'binary', (err) => {
+            if (err) {
+              console.log(err);
+              reject('compile_one fs.writefile');
+            } else {
+              child_process.exec(`scalac -cp ${dirPath} ${filePath}`, (err) => {
+                if (err) {
+                  console.log(err);
+                  reject('compile_one child_process.exec scalac');
+                } else {
+                  scalafile.classfile = fs.readfile(filePath, (err) => {
+                    if (err) {
+                      console.log(err);
+                      reject('compile_one fs.readfile to upload to db');
+                    } else {
+                      scalafile.save((err) => {
+                        if (err) {
+                          console.log(err);
+                          reject('compile_one scalafile.save');
+                        } else {
+                          resolve(passdata);
+                        }
+                      }); //scalafile.save
+                    }
+                  }); //fs.readfile : updload classfile to db
+                }
+              }); //child_process.exec scalac
+            }
+          }); //fs.writefile : download srcfile from db
+        } else {
+          reject('compile_one srcfile not saved'); //unlikely to happen
+        }
+      });  //scalafile.findone
+    }); //return new promise
+  }
   
 }

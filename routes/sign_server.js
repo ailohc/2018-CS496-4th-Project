@@ -43,6 +43,7 @@ module.exports = (app, User, Scalafile) => {
                 let user = new User();
                 user.user_id = req.body.id;
                 user.pw = req.body.pw;
+                user.projectnames = new Array();
                 user.save((err) => {
                     if (err) {
                         res.json({success:0});
@@ -55,4 +56,24 @@ module.exports = (app, User, Scalafile) => {
             }
         });
     });
+
+    app.get('/isloggedin', (req, res) => { //pass id to session
+        var id = req.session.user_id;
+        if (id == null) {
+            var loginboolean = false;
+        } else {
+            var loginboolean = true;
+        }
+        res.json({isloggedin: loginboolean});
+    });
+
+    app.get('/log-out', (req, res) => { //pass id to session
+        req.session.destroy();
+        //res.render('login.html');
+    });
+
+    app.get('/home', (req, res) => { //pass id to session
+        res.render('login.html');
+    });
+
 }

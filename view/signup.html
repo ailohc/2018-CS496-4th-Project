@@ -16,8 +16,9 @@
 						<h1><a href="login.html">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
+						   	<li><a id="myprojects" href="signin.html">My Projects</a></li>
 							  <li class="dropdown">
-								 <a href="javascript:void(0)" class="dropbtn">My Editor</a>
+								 <a href="javascript:void(0)" class="dropbtn">My Account</a>
 								 <div class="dropdown-content">
 									<a href="signin.html">Sign In</a>
 									<a href="signup.html">Sign Up</a>
@@ -97,12 +98,11 @@
 						var resultJSON = ajax.response;
 						var result_obj = JSON.parse(resultJSON);
 						var check = result_obj.success;
-						//NEED TO CHANGE
 						if(check == 1){
 							id("check").textContent="this id has been used";
 							return;
 						}
-						else if (check ==0){
+						else if (check == 0){
 							id("check").textContent="...error";
 							return;
 						} else {

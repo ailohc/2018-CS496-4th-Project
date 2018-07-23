@@ -4,30 +4,32 @@ module.exports = (app, User, Scalafile) => {
         res.render('filepage.html');
     })
 
-    app.post('/files-select', (req, res) => { //TODO
-        Project.findOne({
+    
+
+    app.post('/files-select', (req, res) => {
+        let resJson = new Object();
+        resJson.success = false;
+        resJson.filename = req.body.filename; 
+        Scalafile.findOne({
             $and: [
             {user_id: req.session.user_id},
-            {projectname: req.body.projectname}
+            {projectname: req.body.projectname},
+            {classname: req.body.filename}
             ]
-        }, (err, project) => {
+        }, (err, scalafile) => {
             if (err) {
-                console.log("user.findone err");
+                console.log("scalafile.findone err");
                 console.log(err);
-                res.json({success:false, filename:req.body.filename});
+                res.json(resJson);
                 return;
-            } else if (project) {
-                console.log("project.findone success!");
-                let storedFiles = project.files;
-                for (let i=0; i<storedFiles.length; i++) {
-                    if (storedFiles[i].filename == req.body.filename) {
-                        res.json({success:true, filename:req.body.filename, code:storedFiles[i].code});
-                        return;
-                    }
-                }
+            } else if (scalafile) {
+                console.log("scalafile.findone success!");
+                resJson.success = true;
+                resJson.code = scalafile.code;
+                res.json(resJson);
+            } else {
+                res.json(resJson);
             }
-            res.json({success:false, filename:req.body.filename});
-            return;
         });
     });
 

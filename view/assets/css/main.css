@@ -255,6 +255,14 @@ input, select, textarea {
 		text-transform: uppercase;
 		font-size: 0.8em;
 	}
+	h11 {
+		color: #3c3b3b;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 800;
+		letter-spacing: 0.25em;
+		line-height: 1.65;
+		margin: 0 0 1em 0;
+	}
 
 		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
 			color: inherit;
@@ -2834,6 +2842,21 @@ input, select, textarea {
 		    -webkit-text-fill-color: #000;
 		    border-top: 3px solid rgba(43, 39, 39, 0.8);
 		    transition: opacity .5s ease-in-out;
+		}
+
+		main {
+		    min-height: 500px;
+		    background: #f9f9f9;
+		    padding: 50px 0;
+		}
+
+		.container {
+		    background: #f9f9f9;
+		    width: 100%;
+		}
+		.links a{
+		  color: #fff;
+		  font-family: "Raleway",sans-serif;
 		}
 
 /* Post */

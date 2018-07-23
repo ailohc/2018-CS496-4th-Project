@@ -15,13 +15,13 @@
             <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 			<div id="wrapper">
                     <header id="header">
-                            <h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
+                            <h1><a onclick="go_to_homepage();">Scala Editor</a></h1>
                             <nav class="links">
                                <ul>
                                   <li class="dropdown">
-                                     <a href="javascript:void(0)" class="dropbtn">My Editor</a>
+                                     <a href="javascript:void(0)" class="dropbtn">My Account</a>
                                      <div class="dropdown-content">
-                                            <a onclick="logout();" class="button large fit">Log Out</a>
+                                            <a onclick="logout();">Log Out</a>
                                         </div>
                                   </li>
                                </ul>
@@ -50,8 +50,10 @@
 										if (xhr.readyState == XMLHttpRequest.DONE) {
 											var resultJSON = xhr.response; 
 											result_obj = JSON.parse(resultJSON);
+                                            if (result_obj.success) {
                                             array = result_obj.projects;
                                             console.log(array);
+                                            console.log(resultJSON);
                                             Array.from(array, child => {
                                             var li = document.createElement("li");
                                             var text = document.createTextNode(child);
@@ -63,7 +65,10 @@
                                             li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+child+">"+child+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
                                             document.getElementById("myUl").appendChild(li);
                                             });
-										}
+										    } else {
+                                                swal("Fail to Load from Server!");
+                                            }
+                                        }
 									}	
             });
             //get projectname from user
@@ -98,16 +103,21 @@
 										xhr1.send(codestring);
 										xhr1.onreadystatechange = function() {
 											if (xhr1.readyState == XMLHttpRequest.DONE) {
-												var resultJSON = xhr1.response; 
-												result_obj = JSON.parse(resultJSON);
+												var makeresultJSON = xhr1.response;
+												makeresult_obj = JSON.parse(makeresultJSON);
+                                                if (makeresult_obj.success) {
 												swal('Saved!');
-                                                window.location.reload(true);	
+                                                window.location.reload(true);
+                                                }
+                                                else {
+                                                    swal('Failed!')
+                                                }	
 											}
 										}                  
             }
             //for rendering - go back to the filepage
-            function go_to_filepage() {
-				location.replace('/myprojects');
+            function go_to_homepage() {
+				location.href = '/home';
 			}
             //array = ["slide1", "slide2", "slide3", "slide4", "slide5", "slide6"]
             //creating list elements on the page
@@ -127,7 +137,7 @@
                 xhr2.send(projectstring);
                 xhr2.onreadystatechange = function() {
 					if (xhr2.readyState == XMLHttpRequest.DONE) {
-                        location.replace('/filepage');
+                        location.href = '/filepage';
 							}
 						}
                 /***todo***/
@@ -139,7 +149,7 @@
                 var log_out = new XMLHttpRequest();
                 log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
                 log_out.send(null);
-
+                location.href = '/home';
             }
             </script>
 
