@@ -63,11 +63,11 @@
 			</style>
 			<div id="wrapper">
 				<header id="header">
-						<h1><a onclick="go_to_filepage();">Scala Editor</a></h1>
+						<h1><a onclick="go_to_homepage();">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
 								<li class="dropdown">
-										<a href="javascript:void(0)" class="dropbtn">My Editor</a>
+										<a href="javascript:void(0)" class="dropbtn">My Account</a>
 										<div class="dropdown-content">
 										   <a onclick="logout();">Log Out</a>
 										   </div>
@@ -103,8 +103,8 @@
 							</textarea></form>
 
 							<p>
-									<button type="button" onclick="save_to_local();">Save to local</button>
-								<button type="button" onclick="save_to_server();">Save to server</button>
+									<button type="button" onclick="save_to_local();">Download</button>
+								<button type="button" onclick="save_to_server();">Save</button>
 							<button type="button" onclick="compile_one_to_server();">Compile One</button>
 							<button type="button" onclick="compile_all_to_server();">Compile All</button>
 							<button type="button" onclick="run_to_server();">Run</button>
@@ -158,8 +158,8 @@
 															}	
 									});
 									//for rendering - go back to the filepage
-									function go_to_filepage() {
-										location.href = '/myprojects';
+									function go_to_homepage() {
+										location.href = '/home';
 									}
 									
 								
@@ -191,17 +191,24 @@
 										}
 									}
 								});
-								
-								
 								$(document).keydown(function(event) {
+									var key = undefined;
+    								var possible = [ event.key, event.keyIdentifier, event.keyCode, event.which ];
+									while (key === undefined && possible.length > 0){
+										key = possible.pop();
+									}
 									if (event.keyCode == '117') {
-										console.log("2");
 										editor.getDoc().setValue("object {\n\tdef main(args: Array[String]) {\n\t\t\n\t}\n}");
 									}
 									else if (event.keyCode == '118') {
 										editor.getDoc().setValue("def {\n\n}");
 									}
-									});
+									else if (key && (key == '115' || key == '83' ) && (event.ctrlKey || event.metaKey) && !(event.altKey)) {
+										event.preventDefault();
+										console.log("saveeeee");
+										save_to_server();
+									}
+								});
 								//generating list elements for file tree
 								function refresh_file_tree(refresharray) {
 									//document.getElementById("filelinks") = "";
@@ -345,12 +352,16 @@
 												var compileresultJSON = xhr_compile.response; 
 												compileresult_obj = JSON.parse(compileresultJSON);
 												console.log(compileresultJSON);
-												if (compileresult_obj.output == undefined){
+												if (compileresult_obj.output == ""){
 													swal("Compile Success!");
+													document.getElementById("google").value = "";
+													document.getElementById("stackoverflow").value = "";
 													}
 												else {
 													swal ("Compile Failed!");
 													document.result_form.result_text.value = compileresult_obj.output;
+													document.getElementById("google").value = compileresult_obj.output;
+													document.getElementById("stackoverflow").value = compileresult_obj.output;
 													}
 												compile_array = compileresult_obj.filelist;
 												refresh_file_tree(compile_array);
@@ -424,7 +435,24 @@
 										xhr.onreadystatechange = function() {
 											if (xhr.readyState == XMLHttpRequest.DONE) {
 												var resultJSON = xhr.response; 
+												console.log(resultJSON);
 												result_obj = JSON.parse(resultJSON);
+												if (result_obj.success === 0) {
+													swal("Failed to run!");
+												}
+												else if (result_obj.success === 1) {
+													swal("Runtime Error Occured!");
+													var errorstring = result_obj.output.split("\n");
+													errortoken = errorstring[0];
+													console.log(errortoken);
+													document.getElementById("google").value = result_obj.output;
+													document.getElementById("stackoverflow").value = result_obj.output;
+												}
+												else {
+													swal("Great!")
+													document.getElementById("google").value = "";
+													document.getElementById("stackoverflow").value = "";
+												}
 												document.result_form.result_text.value = result_obj.output;
 												run_array = result_obj.filelist;
 												refresh_file_tree(run_array);
@@ -439,6 +467,8 @@
 										document.std_inform.std_in.value = "";
 										document.getElementById("codename").innerText = "";
 										editor.getDoc().setValue("");
+										document.getElementById("google").value = "";
+										document.getElementById("stackoverflow").value = "";
 										//window.location.reload(true);	
 									}
 
@@ -473,13 +503,12 @@
 									}
 
 
-
 									function logout() {
 										console.log("logout request");
 										var log_out = new XMLHttpRequest();
 										log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
 										log_out.send(null);
-
+										location.href = '/home';
 									}
 								
 							  </script>
