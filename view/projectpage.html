@@ -50,6 +50,7 @@
 										if (xhr.readyState == XMLHttpRequest.DONE) {
 											var resultJSON = xhr.response; 
 											result_obj = JSON.parse(resultJSON);
+                                            if (result_obj.success) {
                                             array = result_obj.projects;
                                             console.log(array);
                                             Array.from(array, child => {
@@ -63,7 +64,10 @@
                                             li.innerHTML = "<article><header><h3><a onclick='link_click(this);' id="+child+">"+child+"</a></h3></header><a href='filepage.html' class='image'><img src='images/pic"+image_num+".jpg' alt='' /></a></article>";
                                             document.getElementById("myUl").appendChild(li);
                                             });
-										}
+										    } else {
+                                                swal("Fail to Load from Server!");
+                                            }
+                                        }
 									}	
             });
             //get projectname from user
@@ -98,10 +102,15 @@
 										xhr1.send(codestring);
 										xhr1.onreadystatechange = function() {
 											if (xhr1.readyState == XMLHttpRequest.DONE) {
-												var resultJSON = xhr1.response; 
-												result_obj = JSON.parse(resultJSON);
+												var makeresultJSON = xhr1.response;
+												makeresult_obj = JSON.parse(makeresultJSON);
+                                                if (makeresult_obj.success) {
 												swal('Saved!');
-                                                window.location.reload(true);	
+                                                window.location.reload(true);
+                                                }
+                                                else {
+                                                    swal('Failed!')
+                                                }	
 											}
 										}                  
             }

@@ -125,6 +125,7 @@
 																	var resultJSON = xh.response; 
 																	result_obj = JSON.parse(resultJSON);
 																	console.log(resultJSON);
+																	if (result_obj.success) {
 																	array = result_obj.files;
 																	user = result_obj.username;
 																	projectname = result_obj.projectname;
@@ -134,6 +135,10 @@
                 													li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3>";
                 													document.getElementById("filelinks").appendChild(li);
                 													});
+																}
+																else {
+																		swal("Fail to Load from Server!");
+																	}
 																}
 															}	
 									});
@@ -208,9 +213,13 @@
 										if (xhr1.readyState == XMLHttpRequest.DONE) {
 											var file_resultJSON = xhr1.response;
 											file_result_obj = JSON.parse(file_resultJSON);
+											if (file_result_obj.success){
 											editor.getDoc().setValue(file_result_obj.code);
 											document.result_form.result_text.value = "";
 											document.std_inform.std_in.value = "";
+											} else {
+												swal("Fail to Load from Server!");
+											}
 										}
 									}
 								}
@@ -257,10 +266,15 @@
 											if (save_xhr.readyState == XMLHttpRequest.DONE) {
 												var save_result = save_xhr.response; 
 												save_result_obj = JSON.parse(save_result);
+												if (save_result_obj.success) {
 												save_array = save_result_obj.filelist;
 												refresh_file_tree(save_array);
 												document.getElementById("codename").innerText = saveclassname;
 												swal('Saved!');
+												}
+												else {
+													swal('Fail to Load from Server!');
+												}
 											}
 										}	
 									}
