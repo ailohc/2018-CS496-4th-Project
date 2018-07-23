@@ -31,6 +31,7 @@
 			<script src="addon/search/matchesonscrollbar.js"></script>
 			<script src="addon/search/jump-to-line.js"></script>
 			<script src="addon/search/match-highlighter.js"></script>
+			<script src="addon/effect/code-blast.js"></script>
 			<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<style type="text/css">
 			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
@@ -140,6 +141,7 @@
 									function go_to_filepage() {
 										location.replace('/myprojects');
 									}
+									
 									//code for coding area
 									var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
 									lineNumbers: true,
@@ -168,6 +170,16 @@
 										}
 									}
 								});
+								
+								$(document).keydown(function(event) {
+									if (event.keyCode == '112') {
+										console.log("2");
+										editor.getDoc().setValue("object {\n\tdef main(args: Array[String]) {\n\t\t\n\t}\n}");
+									}
+									else if (event.keyCode == '113') {
+										editor.getDoc().setValue("def {\n\n}");
+									}
+									});
 								//generating list elements for file tree
 								function refresh_file_tree(refresharray) {
 									Array.from(refresharray, child => {
@@ -196,7 +208,7 @@
 										if (xhr1.readyState == XMLHttpRequest.DONE) {
 											var file_resultJSON = xhr1.response;
 											file_result_obj = JSON.parse(file_resultJSON);
-											editor.value = file_result_obj.code;
+											editor.getDoc().setValue(file_result_obj.code);
 											document.result_form.result_text.value = "";
 											document.std_inform.std_in.value = "";
 										}
@@ -380,7 +392,7 @@
 										document.result_form.result_text.value = "";
 										document.std_inform.std_in.value = "";
 										document.getElementById("codename").innerText = "";
-										editor.value = "";
+										editor.getDoc().setValue("");
 										//window.location.reload(true);	
 									}
 									function logout() {
