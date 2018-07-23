@@ -8,17 +8,19 @@ module.exports = (app, User, Scalafile) => {
     let passdata = {user_id: req.session.user_id,
                     projectname: req.body.projectname,
                     classname: req.body.classname,
-                    code: req.body.code};
+                    code: req.body.code,
+                    filelist: new Array()
+                    };
     rmv_dir(passdata)
     .then(mk_dir)
     .then(write_temp)
     .then(upload_db_src)
     .then(rmv_dir)
     .then(find_filelist)
-    .then((filelist) => {
+    .then((passdata) => {
       console.log('below is filelist:');
-      console.log(filelist);
-      res.json({success: true, filelist: filelist});
+      console.log(passdata.filelist);
+      res.json({success: true, filelist: passdata.filelist});
     })
     .catch((where) => {
       console.log(where);
@@ -36,7 +38,9 @@ module.exports = (app, User, Scalafile) => {
                     projectname: req.body.projectname,
                     classname: req.body.classname,
                     code: req.body.code,
-                    output: ""};
+                    output: "",
+                    filelist: new Array()
+                  };
     rmv_dir(passdata)
     .then(mk_dir)
     .then(write_temp)
@@ -45,14 +49,13 @@ module.exports = (app, User, Scalafile) => {
     .then(upload_db_class)
     .then(rmv_dir)
     .then(find_filelist)
-    .then((filelist) => {
+    .then(find_filelist)
+    .then((passdata) => {
       console.log('below is filelist:')
-      console.log(filelist);
-      console.log(passdata.output);
-      res.json({success: true, output: passdata.output, filelist: filelist});
+      console.log(passdata.filelist);
+      res.json({success: passdata.success, output: passdata.output, filelist: passdata.filelist});
     })
     .catch((where) => {
-      console.log('escaped!')
       console.log(where);
       res.json({success:false, output: passdata.output});
     });
@@ -66,17 +69,19 @@ module.exports = (app, User, Scalafile) => {
                     classname: req.body.classname,
                     input: req.body.input,
                     success: 0,
-                    output: ""};
+                    output: "",
+                    filelist: new Array()
+                  };
     rmv_dir(passdata)
     .then(mk_dir)
     .then(donwload_db_classes)
     .then(class_run)
     .then(rmv_dir)
     .then(find_filelist)
-    .then((filelist) => {
+    .then((passdata) => {
       console.log('below is filelist:')
-      console.log(filelist);
-      res.json({success: passdata.success, output: passdata.output, filelist: filelist});
+      console.log(passdata.filelist);
+      res.json({success: passdata.success, output: passdata.output, filelist: passdata.filelist});
     })
     .catch((where) => {
       console.log(where);
@@ -97,16 +102,17 @@ module.exports = (app, User, Scalafile) => {
         if (err) {
           console.log("find_filelist user.findone err");
           console.log(err);
-          resolve(new Array());
+          resolve(passdata);
         } else if (scalafiles.length == 0) {
-          resolve(new Array());
+          resolve(passdata);
         } else {
           let files = new Array();
           for (let i=0; i<scalafiles.length; i++) {
               console.log(scalafiles[i].classname);
               files.push(scalafiles[i].classname);
           }
-          resolve(files);
+          passdata.filelist = files;
+          resolve(passdata);
         }
       });
     });
