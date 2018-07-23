@@ -21,7 +21,7 @@
                                   <li class="dropdown">
                                      <a href="javascript:void(0)" class="dropbtn">My Editor</a>
                                      <div class="dropdown-content">
-                                            <a onclick="logout();" class="button large fit">Log Out</a>
+                                            <a onclick="logout();">Log Out</a>
                                         </div>
                                   </li>
                                </ul>
@@ -53,6 +53,7 @@
                                             if (result_obj.success) {
                                             array = result_obj.projects;
                                             console.log(array);
+                                            console.log(resultJSON);
                                             Array.from(array, child => {
                                             var li = document.createElement("li");
                                             var text = document.createTextNode(child);

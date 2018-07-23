@@ -223,9 +223,49 @@ input, select, textarea {
 		font-size: 0.8em;
 	}
 
+	h8 {
+		color: #ffffff;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 800;
+		letter-spacing: 0.25em;
+		line-height: 2;
+		text-transform: uppercase;
+		font-size: 2em;
+
+	}
+
+	h9 {
+		color: #ffffff;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 800;
+		letter-spacing: 0.25em;
+		line-height: 2;
+		margin: 0 0 1em 0;
+		text-transform: uppercase;
+		font-size: 1em;
+	}
+
+	h10 {
+		color: #ff0000;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 400;
+		letter-spacing: 0.25em;
+		line-height: 1.65;
+		margin: 0 0 1em 0;
+		text-transform: uppercase;
+		font-size: 0.8em;
+	}
+	h11 {
+		color: #3c3b3b;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 800;
+		letter-spacing: 0.25em;
+		line-height: 1.65;
+		margin: 0 0 1em 0;
+	}
+
 		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
 			color: inherit;
-			border-bottom: 0;
 		}
 
 	h2 {
@@ -2720,6 +2760,88 @@ input, select, textarea {
 					width: 100%;
 				}
 
+		}
+
+
+/* Home */
+
+	.hero {
+		  background-image: url(https://rimaone.com/wp-content/uploads/2015/12/Header-rimaone.jpg);
+		  background-repeat: no-repeat;
+		  background-size: cover;
+		  background-position: center center;
+		  padding: 50px 0;
+		  min-height: 350px;
+		  position: relative;
+		}
+		.hero-content {
+		    position: relative;
+		    top: 50%;
+		    bottom: 50%;
+		    width: 100%;
+			text-align: center;
+		}
+
+		.bg-clip {
+		  position: relative;
+		  display: inline-block;
+		  margin: 1rem;
+		  padding: 1em .75em;
+		  font-size: 72px;
+		  font-weight: bold;
+		  text-align: center;
+		  color: #fff;
+		  -webkit-background-clip: text;
+		  -webkit-text-fill-color: transparent;
+		  background-image: url(https://rimaone.com/wp-content/uploads/2015/12/Header-rimaone.jpg);
+		  background-size: cover;
+		  background-repeat: no-repeat;
+			border: 1px solid #4c458b;
+		}
+		.bg-clip::before {
+		  content: '';
+		  position: absolute;
+		  top: 0;
+		  left: 0;
+		  width: 100%;
+		  height: 100%;
+		  background-color: black;
+		  z-index: -2;
+		  background-image: inherit;
+		  background-repeat: no-repeat;
+		  background-size: cover;
+		}
+		.bg-clip::after {
+		  content: '';
+		  position: absolute;
+		  top: 0;
+		  right: 0;
+		  left: 0;
+		  bottom: 0;
+		  z-index: -1;
+		  background-image: linear-gradient(rgba(0, 0, 0, 0.9) 25%, rgba(0, 0, 0, 0.8) 50%, rgba(0, 0, 0, 0.25) 100%);
+		  transition: opacity .5s ease-in-out;
+		}
+		.bg-clip:hover {
+		  cursor: pointer;
+		}
+		/*.bg-clip:hover::after, .bg-clip:hover span {
+		  opacity: 0;
+		}*/
+
+		.bg-clip span {
+		    position: absolute;
+		    bottom: 1rem;
+		    display: block;
+		    margin-top: 1rem;
+		    padding-top: .5rem;
+		    font-size: 16px;
+		    font-weight: normal;
+		    letter-spacing: 2px;
+		    text-transform: none;
+		    -webkit-text-fill-color: #000;
+		    border-top: 3px solid rgba(43, 39, 39, 0.8);
+		    transition: opacity .5s ease-in-out;
 		}
 
 /* Post */
