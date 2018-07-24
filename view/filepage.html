@@ -91,13 +91,14 @@
 									<section>
 										<ul class="actions stacked">
 											<li><a class="button large fit" onclick="make_new_file();">new file</a></li>
+											<li><a class="button large fit" onclick="docs();">?</a></li>
 										</ul>
 									</section>
 		
 							</section>
 
 					<div id="main">
-										<h11><p id="codename"></p></h11>
+						<h11><p id="codename"></p></h11> 
 
 						<form name = "code_form"><textarea id="code_text">
 							</textarea></form>
@@ -105,8 +106,7 @@
 							<p>
 									<button type="button" onclick="save_to_local();">Download</button>
 								<button type="button" onclick="save_to_server();">Save</button>
-							<button type="button" onclick="compile_one_to_server();">Compile One</button>
-							<button type="button" onclick="compile_all_to_server();">Compile All</button>
+							<button type="button" onclick="compile_one_to_server();">Compile</button>
 							<button type="button" onclick="run_to_server();">Run</button>
 							<h5>StdIn</h5>
 							<form class = "inputform" name = "std_inform"><textarea rows="2" id="std_in" name = "std_in"></textarea></form></p>
@@ -151,7 +151,7 @@
 																	Array.from(array, child => {
                 													var li = document.createElement("li");
                 													var text = document.createTextNode(child);
-                													li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3>";
+                													li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3></a><a onclick='delete_item(this);' id="+child+">X</a>";
                 													document.getElementById("filelinks").appendChild(li);
                 													});
 																}
@@ -247,11 +247,41 @@
 											document.result_form.result_text.value = "";
 											document.std_inform.std_in.value = "";
 											} else {
-												swal("Fail to Load from Server!");
+												swal("Failed to Load from Server!");
 											}
 										}
 									}
 								}
+
+								function delete_item(deleteitem) {
+									let delete_one = deleteitem.getAttribute('id');
+									console.log(delete_one);
+									var deleteJSON = {"projectname": project_name, "filename" : delete_one};
+									var deletestring = JSON.stringify(deleteJSON);
+									console.log(deleteJSON);
+									var xhr_delete = new XMLHttpRequest();
+									xhr_delete.open("POST", 'http://52.231.65.108:8080/file-delete', true);
+									xhr_delete.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr_delete.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr_delete.setRequestHeader("Content-Type", "application/json");
+									xhr_delete.send(deletestring);
+									xhr_delete.onreadystatechange = function() {
+										if (xhr_delete.readyState == XMLHttpRequest.DONE) {
+											var delete_JSON = xhr_delete.response;
+											delete_result_obj = JSON.parse(delete_JSON);
+											if (delete_result_obj.success) {
+												swal("Success!");
+												window.location.reload(true);
+											}
+											else {
+												swal("Failed to Delete from Server!");
+											}
+										}
+									}
+
+								}
+
+						
 
 								//when the save button is clicked
 								function save_to_server() {
@@ -353,7 +383,7 @@
 												var compileresultJSON = xhr_compile.response; 
 												compileresult_obj = JSON.parse(compileresultJSON);
 												console.log(compileresultJSON);
-												if (compileresult_obj.output == ""){
+												if (compileresult_obj.success == true){
 													swal("Compile Success!");
 													document.getElementById("google").value = "";
 													document.getElementById("stackoverflow").value = "";
@@ -372,25 +402,6 @@
 
 								}
 
-								function compile_all_to_server() {
-									document.result_form.result_text.value = "";
-									var compileallcodeJSON = {"projectname" : project_name};
-									var compileallcodestring = JSON.stringify(compileallcodeJSON);
-									console.log(compileallcodestring);
-									var xhr_all_compile = new XMLHttpRequest();
-									xhr_all_compile.open("POST", 'http://52.231.65.108:8080/compile-all', true);
-									xhr_all_compile.setRequestHeader('Access-Control-Allow-Origin', '*');
-									xhr_all_compile.setRequestHeader("Access-Control-Allow-Credentials", "true");
-									xhr_all_compile.setRequestHeader("Content-Type", "application/json");
-									xhr_all_compile.send(compileallcodestring);
-									xhr_all_compile.onreadystatechange = function() {
-										var compileallresultJSON = xhr_all_compile.response;
-										compileallresult_obj = JSON.parse(compileallresultJSON);
-										document.result_form.result_text.value = compileallresult_obj.output;
-										compile_all_array = compileallresult_obj.filelist;
-										refresh_file_tree(compile_all_array);
-									}
-								}
 
 								//when the run button is clicked
 								function run_to_server(){
@@ -471,6 +482,10 @@
 										document.getElementById("google").value = "";
 										document.getElementById("stackoverflow").value = "";
 										//window.location.reload(true);	
+									}
+
+									function docs() {
+										swal("aaaa");
 									}
 
 									function save_to_local() {
