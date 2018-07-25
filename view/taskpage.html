@@ -1,0 +1,764 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Scala Editor</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload" onload ="whenLoaded();">
+			<link rel="stylesheet" href="theme/yeti.css">
+			<link rel="stylesheet" href="lib/codemirror.css">
+			<link rel="stylesheet" href="addon/dialog/dialog.css">
+			<link rel="stylesheet" href="addon/hint/show-hint.css">
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script src="theme/yeti.css"></script>
+			<script src="lib/codemirror.js"></script>
+			<script src="mode/clike/clike.js"></script>
+			<script src="addon/display/fullscreen.js"></script>
+			<script src="addon/edit/matchbrackets.js"></script>
+			<script src="addon/edit/closebrackets.js"></script>
+			<script src="addon/hint/show-hint.js"></script>
+			<script src="addon/hint/anyword-hint.js"></script>
+			<script src="addon/dialog/dialog.js"></script>
+			<script src="addon/search/searchcursor.js"></script>
+			<script src="addon/search/search.js"></script>
+			<script src="addon/scroll/annotatescrollbar.js"></script>
+			<script src="addon/search/matchesonscrollbar.js"></script>
+			<script src="addon/search/jump-to-line.js"></script>
+			<script src="addon/search/match-highlighter.js"></script>
+			<script src="addon/effect/code-blast.js"></script>
+			<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+			<script type="text/javascript" src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.js" ></script>
+			<script src="https://code.haiku.ai/scripts/core/HaikuCore.3.2.16.min.js"></script>
+			<script src="https://cdn.haiku.ai/e28364e7-e882-4230-a504-d245344d06b4/dcb6f00a4a46e8561c2c37771aa7dd84584bf4b9/index.embed.js"></script>
+			<style type="text/css">
+			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
+			@media screen and (min-width: 1300px) {
+				article { max-width: 1000px; }
+				#nav { border-right: 499px solid transparent; }
+				}
+				span.clicky {
+				cursor: pointer;
+				background: #d70;
+				color: white;
+				padding: 0 3px;
+				border-radius: 3px;
+				}
+			.CodeMirror-focused .cm-matchhighlight {
+				background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+				background-position: bottom;
+				background-repeat: repeat-x;
+			}
+			.cm-matchhighlight {background-color: rgb(219, 221, 199)}
+			.CodeMirror-selection-highlight-scrollbar {background-color: rgb(212, 248, 212)}
+			.CodeMirror-fullscreen {
+				position: fixed;
+				top: 0; left: 0; right: 0; bottom: 0;
+				height: auto;
+				z-index: 9;
+				}
+			</style>
+			<div id="wrapper">
+				<header id="header">
+						<h1><a onclick="go_to_homepage();">Scala Editor</a></h1>
+						<nav class="links">
+						   <ul>
+						   		<li><a id="myprojects" href="projectpage.html">My Projects</a></li>
+								<li class="dropdown">
+										<a href="javascript:void(0)" class="dropbtn">My Account</a>
+										<div class="dropdown-content">
+										   <a onclick="logout();">Log Out</a>
+										   </div>
+								</li>
+								<li><a id="mytasks" href="taskpage.html">My Tasks</a></li>
+						   </ul>
+						</nav>
+						<nav class="main">
+								<ul>
+									<li class="menu">
+										<a class="fa-bars" href="#menu">Menu</a>
+									</li>
+								</ul>
+							</nav>
+						</header>
+	 
+ 						<section id="menu">
+								<section>
+										<ul class="links" id="filelinks">
+											<a onclick= 'link_click(this);' id="Task1"><h3>Task 1</h3></a>
+											<a onclick= 'link_click(this);' id="Task2"><h3>Task 2</h3></a>
+										</ul>
+									</section>
+									<section>
+										<ul class="actions stacked">
+											<!--<li><a class="button large fit" onclick="make_new_file();">new file</a></li>
+											<li><a class="button large fit" onclick="docs();">?</a></li>-->
+										</ul>
+									</section>
+		
+							</section>
+
+					<div id="main">
+
+						<h11><p id="taskname"></p></h11> 
+
+						<h12><p id="taskdescription"></p></h12>
+
+						<div id="successplaceholder"></div>
+
+						<div id="catplaceholder"></div>
+
+						<div id="codedisplay">
+
+						<form name = "code_form"><textarea id="code_text">
+							</textarea></form>
+
+							<p>
+							<button type="button" onclick="save_to_local();">Download</button>
+							<button type="button" onclick="save_to_server();">Save</button>
+							<button type="button" onclick="run_to_server();">Run</button>
+							<button type="button" onclick="submit_task();">Submit</button>
+							<button type="button" onclick="reset_task();">Reset</button>
+							<h5>StdOut</h5>
+							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
+
+						</div>
+
+							  <script>
+								var user = "";
+								var array = "";
+								var taskselected = false;
+
+								function whenLoaded() {
+									if (taskselected) {
+										document.getElementById("codedisplay").style.visibility = "visible";
+										document.getElementById("catplaceholder").innerHTML="";
+									} else {
+										document.getElementById("taskname").innerText = "Please select a task from the sidebar.";
+										document.getElementById("codedisplay").style.visibility = "hidden";
+										document.getElementById("catplaceholder").innerHTML = "<div id=\"codingcat\"></div>";
+										codingcat();
+									}
+								}
+
+								var task1description = "Task1 Description Here";
+								var task2description = "Implement a calculator for Expressions. It should contain 4 basic arithmetic operations (Sum, Sub, Mult, Div).\nFor instance, x+1 is represented by expression Sum(Var(\“x\”)+Const(1)). If the value of variable x is 3, evaluating the expression should give 4.\nDo not change other parts except the one marked as ‘TODO’.";
+
+									//for rendering - go back to the filepage
+									function go_to_homepage() {
+										location.href = '/home';
+									}
+									
+								
+									//code for coding area
+									var editor = CodeMirror.fromTextArea(document.getElementById("code_text"), {
+									lineNumbers: true,
+									matchBrackets: true,
+									autoCloseBrackets: true,
+        							theme: "yeti",
+									mode: "text/x-scala",
+									highlightSelectionMatches: {showToken: /\w/, annotateScrollbar: false},
+									tabSize: 4,
+									indentUnit: 4,
+									indentWithTabs: true,
+									//blastCode: {option : 1},
+									onCursorActivity: function() {
+    									editor.matchHighlight("CodeMirror-matchhighlight");
+									  },
+									  extraKeys: {
+										"Ctrl-Space": "autocomplete",
+										"F11": function(cm) {
+										cm.setOption("fullScreen", !cm.getOption("fullScreen"));
+										$("#header").hide();
+										$("#menu").hide();
+										},
+										"Esc": function(cm) {
+										if (cm.getOption("fullScreen")) cm.setOption("fullScreen", false);
+										$("#header").show();
+										$("#menu").show();
+										}
+									}
+								});
+								$(document).keydown(function(event) {
+									var key = undefined;
+    								var possible = [ event.key, event.keyIdentifier, event.keyCode, event.which ];
+									while (key === undefined && possible.length > 0){
+										key = possible.pop();
+									}
+									if (event.keyCode == '117') {
+										editor.getDoc().setValue("object {\n\tdef main(args: Array[String]) {\n\t\t\n\t}\n}");
+									}
+									else if (event.keyCode == '118') {
+										editor.getDoc().setValue("def {\n\n}");
+									}
+									else if (key && (key == '115' || key == '83' ) && (event.ctrlKey || event.metaKey) && !(event.altKey)) {
+										event.preventDefault();
+										console.log("saveeeee");
+										save_to_server();
+									}
+								});
+								//when file name is clicked, get the code from the server
+								function link_click(element){
+									taskselected = true;
+									whenLoaded();
+									let selected = element.getAttribute('id');
+									let tasknum = parseInt(selected.substring(4, selected.length));
+									console.log(selected);
+									document.getElementById("taskname").innerText = selected;
+									if (tasknum == 1) {
+										document.getElementById("taskdescription").innerText = task1description;
+									} else if (tasknum == 2) {
+										document.getElementById("taskdescription").innerText = task2description;
+									}
+									var fileJSON = {"tasknum" : tasknum};
+									var filestring = JSON.stringify(fileJSON);
+									console.log(filestring);
+									var xhr1 = new XMLHttpRequest();
+									xhr1.open("POST", 'http://52.231.65.108:8080/task-select', true);
+									//xhr1.setRequestHeader('Access-Control-Allow-Origin', '*');
+									//xhr1.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr1.setRequestHeader("Content-Type", "application/json");
+									xhr1.send(filestring);
+									xhr1.onreadystatechange = function() {
+										if (xhr1.readyState == XMLHttpRequest.DONE) {
+											var file_resultJSON = xhr1.response;
+											file_result_obj = JSON.parse(file_resultJSON);
+											if (file_result_obj.success){
+												editor.getDoc().setValue(file_result_obj.code);
+												document.result_form.result_text.value = "";
+											} else {
+												swal("Failed to Load from Server!");
+											}
+										}
+									}
+								}
+								
+								function codingcat() {
+									var component = HaikuComponentEmbed_nflores823_TypingCat(
+									document.getElementById('codingcat'),
+									  {loop: true}
+									);
+									var timeline = component.getDefaultTimeline();
+								  }
+
+								  function successcat() {
+								  	var svgContainer = document.getElementById('svgContainer');
+									bodymovin.loadAnimation({
+									  wrapper: svgContainer,
+									  animType: 'svg',
+									  loop: true,
+									  animationData: JSON.parse(animationData)
+									});
+								  }
+
+								//send code to server for saving
+								function save_to_server() {
+										var savecode = editor.getValue();
+										let selected = document.getElementById("taskname").innerText;
+										let tasknum = parseInt(selected.substring(4, selected.length));
+
+										var savecodeJSON = {"tasknum" : tasknum, "code" : savecode};
+										var savecodestring = JSON.stringify(savecodeJSON);
+										//var save_array = [];
+										console.log(savecodestring);
+										var save_xhr = new XMLHttpRequest();
+										save_xhr.open("POST", 'http://52.231.65.108:8080/task-save', true);
+										//save_xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+										//save_xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										save_xhr.setRequestHeader("Content-Type", "application/json");
+										save_xhr.send(savecodestring);
+										save_xhr.onreadystatechange = function() {
+											if (save_xhr.readyState == XMLHttpRequest.DONE) {
+												var save_result = save_xhr.response; 
+												save_result_obj = JSON.parse(save_result);
+												console.log(save_result_obj);
+												if (save_result_obj.success) {
+													swal('Saved!');
+												}
+												else {
+													swal('Fail to Save!');
+												}
+											}
+										}
+									}
+
+									//send code to server for compiling
+									function run_to_server() {
+										document.result_form.result_text.value = "";
+										var codestring = editor.getValue();
+										var taskname = document.getElementById("taskname").innerText;
+										var tasknum = parseInt(taskname.substring(4, taskname.length));
+
+										var codeJSON = {"tasknum": tasknum, "code" : codestring};
+										var codestring = JSON.stringify(codeJSON);
+										console.log(codestring);
+										var xhr = new XMLHttpRequest();
+										xhr.open("POST", 'http://52.231.65.108:8080/task-run', true);
+										//xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+										//xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										xhr.setRequestHeader("Content-Type", "application/json");
+										xhr.send(codestring);
+										xhr.onreadystatechange = function() {
+											if (xhr.readyState == XMLHttpRequest.DONE) {
+												var resultJSON = xhr.response; 
+												console.log(resultJSON);
+												result_obj = JSON.parse(resultJSON);
+												if (result_obj.success === 0) {
+													swal("Failed to run!");
+												}
+												else if (result_obj.success === 1) {
+													swal("Failed to Compile OR Runtime Error Occured!");
+													var errorstring = result_obj.output.split("\n");
+													errortoken = errorstring[0];
+													console.log(errortoken);
+												}
+												else {
+													swal("Great!")
+												}
+												document.result_form.result_text.value = result_obj.output;
+											}
+										}	
+									}
+
+									function docs() {
+										swal("aaaa");
+									}
+
+									function save_to_local () {
+										var local_code_name = document.getElementById("taskname").innerText;
+										var content = editor.getValue();
+										var filename = local_code_name+".scala";
+										var blob = new Blob([content], {
+											type: "text/plain;charset=utf-8"
+										});
+										saveAs(blob, filename);
+									}
+
+									function submit_task() {
+										document.result_form.result_text.value = "";
+										var codestring = editor.getValue();
+										var taskname = document.getElementById("taskname").innerText;
+										var tasknum = parseInt(taskname.substring(4, taskname.length));
+
+										var codeJSON = {"tasknum": tasknum, "code" : codestring};
+										var codestring = JSON.stringify(codeJSON);
+										console.log(codestring);
+										var xhr = new XMLHttpRequest();
+										xhr.open("POST", 'http://52.231.65.108:8080/task-submit', true);
+										//xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+										//xhr.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										xhr.setRequestHeader("Content-Type", "application/json");
+										xhr.send(codestring);
+										xhr.onreadystatechange = function() {
+											if (xhr.readyState == XMLHttpRequest.DONE) {
+												document.getElementById("successplaceholder").innerHTML = "";
+												var resultJSON = xhr.response; 
+												console.log(resultJSON);
+												result_obj = JSON.parse(resultJSON);
+												if (result_obj.success === 0) {
+													swal("Failed to run!");
+												}
+												else if (result_obj.success === 1) {
+													swal("Failed to Compile OR Runtime Error Occured!");
+												}
+												else {
+													if (result_obj.testpass == 5) {
+														var resultString = "Congratulations! You passed all testcases!";
+														document.getElementById("successplaceholder").innerHTML = "<div id=\"svgContainer\" style=\"width:100%;height:100%;background-color:#000;display:inline-block\"></div>";
+														successcat();
+													} else {
+														var resultString = "You passed "+result_obj.testpass.toString()+" out of 5 testcases!";
+													}
+													swal(resultString);
+													document.result_form.result_text.value = resultString;
+												}
+											}
+										}	
+									}
+
+									function reset_task() {
+										var taskname = document.getElementById("taskname").innerText;
+										var tasknum = parseInt(taskname.substring(4, taskname.length));
+										var skeletonCode = "";
+										if (tasknum == 1) {
+											skeletonCode = "object Task1 {\n\tcase class Branch(length: Int, child: MyMobile)\n\n\tabstract class MyMobile\n\tcase class SimpleMobile(weight: Int)\n\tcase class ComplexMobile(left: Branch, right: Branch)\n\n\tdef balanced(mobile: MyMobile) : Boolean = {\n\t\t//TODO: implement this function\n\t\ttrue\n\t}\n}";
+										} else if ( tasknum == 2) {
+											skeletonCode = "case class CustomException(s: String)  extends Exception(s)\n\nabstract class Expr\n\ncase class Var(v: String) extends Expr\ncase class Const(n: Int) extends Expr\ncase class Sum(a: Expr, b: Expr) extends Expr\ncase class Sub(a: Expr, b: Expr) extends Expr\ncase class Mul(a: Expr, b: Expr) extends Expr\ncase class Div(a: Expr, b: Expr) extends Expr\n\nobject Task2 {\n\ntype Env = String => Int\n\ndef eval (exp: Expr, env: Env): Int = {\n\t//TODO: implement this function\n\t0 //modify this\n\t}\n}";
+										}
+										editor.setValue(skeletonCode);
+										document.result_form.result_text.value = "";
+									}
+
+									function logout() {
+										console.log("logout request");
+										var log_out = new XMLHttpRequest();
+										log_out.open("GET", 'http://52.231.65.108:8080/log-out', true);
+										log_out.send(null);
+										location.href = '/home';
+									}
+								
+							  </script>
+					</div>
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+			<script>
+				/* Confetti by Patrik Svensson (http://metervara.net) */
+$(document).ready(function() {
+    var frameRate = 30;
+    var dt = 1.0 / frameRate;
+    var DEG_TO_RAD = Math.PI / 180;
+    var RAD_TO_DEG = 180 / Math.PI;
+    var colors = [
+        ["#df0049", "#660671"],
+        ["#00e857", "#005291"],
+        ["#2bebbc", "#05798a"],
+        ["#ffd200", "#b06c00"]
+    ];
+
+    function Vector2(_x, _y) {
+        this.x = _x, this.y = _y;
+        this.Length = function() {
+            return Math.sqrt(this.SqrLength());
+        }
+        this.SqrLength = function() {
+            return this.x * this.x + this.y * this.y;
+        }
+        this.Equals = function(_vec0, _vec1) {
+            return _vec0.x == _vec1.x && _vec0.y == _vec1.y;
+        }
+        this.Add = function(_vec) {
+            this.x += _vec.x;
+            this.y += _vec.y;
+        }
+        this.Sub = function(_vec) {
+            this.x -= _vec.x;
+            this.y -= _vec.y;
+        }
+        this.Div = function(_f) {
+            this.x /= _f;
+            this.y /= _f;
+        }
+        this.Mul = function(_f) {
+            this.x *= _f;
+            this.y *= _f;
+        }
+        this.Normalize = function() {
+            var sqrLen = this.SqrLength();
+            if (sqrLen != 0) {
+                var factor = 1.0 / Math.sqrt(sqrLen);
+                this.x *= factor;
+                this.y *= factor;
+            }
+        }
+        this.Normalized = function() {
+            var sqrLen = this.SqrLength();
+            if (sqrLen != 0) {
+                var factor = 1.0 / Math.sqrt(sqrLen);
+                return new Vector2(this.x * factor, this.y * factor);
+            }
+            return new Vector2(0, 0);
+        }
+    }
+    Vector2.Lerp = function(_vec0, _vec1, _t) {
+        return new Vector2((_vec1.x - _vec0.x) * _t + _vec0.x, (_vec1.y - _vec0.y) * _t + _vec0.y);
+    }
+    Vector2.Distance = function(_vec0, _vec1) {
+        return Math.sqrt(Vector2.SqrDistance(_vec0, _vec1));
+    }
+    Vector2.SqrDistance = function(_vec0, _vec1) {
+        var x = _vec0.x - _vec1.x;
+        var y = _vec0.y - _vec1.y;
+        return (x * x + y * y + z * z);
+    }
+    Vector2.Scale = function(_vec0, _vec1) {
+        return new Vector2(_vec0.x * _vec1.x, _vec0.y * _vec1.y);
+    }
+    Vector2.Min = function(_vec0, _vec1) {
+        return new Vector2(Math.min(_vec0.x, _vec1.x), Math.min(_vec0.y, _vec1.y));
+    }
+    Vector2.Max = function(_vec0, _vec1) {
+        return new Vector2(Math.max(_vec0.x, _vec1.x), Math.max(_vec0.y, _vec1.y));
+    }
+    Vector2.ClampMagnitude = function(_vec0, _len) {
+        var vecNorm = _vec0.Normalized;
+        return new Vector2(vecNorm.x * _len, vecNorm.y * _len);
+    }
+    Vector2.Sub = function(_vec0, _vec1) {
+        return new Vector2(_vec0.x - _vec1.x, _vec0.y - _vec1.y, _vec0.z - _vec1.z);
+    }
+
+    function EulerMass(_x, _y, _mass, _drag) {
+        this.position = new Vector2(_x, _y);
+        this.mass = _mass;
+        this.drag = _drag;
+        this.force = new Vector2(0, 0);
+        this.velocity = new Vector2(0, 0);
+        this.AddForce = function(_f) {
+            this.force.Add(_f);
+        }
+        this.Integrate = function(_dt) {
+            var acc = this.CurrentForce(this.position);
+            acc.Div(this.mass);
+            var posDelta = new Vector2(this.velocity.x, this.velocity.y);
+            posDelta.Mul(_dt);
+            this.position.Add(posDelta);
+            acc.Mul(_dt);
+            this.velocity.Add(acc);
+            this.force = new Vector2(0, 0);
+        }
+        this.CurrentForce = function(_pos, _vel) {
+            var totalForce = new Vector2(this.force.x, this.force.y);
+            var speed = this.velocity.Length();
+            var dragVel = new Vector2(this.velocity.x, this.velocity.y);
+            dragVel.Mul(this.drag * this.mass * speed);
+            totalForce.Sub(dragVel);
+            return totalForce;
+        }
+    }
+
+    function ConfettiPaper(_x, _y) {
+        this.pos = new Vector2(_x, _y);
+        this.rotationSpeed = Math.random() * 600 + 800;
+        this.angle = DEG_TO_RAD * Math.random() * 360;
+        this.rotation = DEG_TO_RAD * Math.random() * 360;
+        this.cosA = 1.0;
+        this.size = 5.0;
+        this.oscillationSpeed = Math.random() * 1.5 + 0.5;
+        this.xSpeed = 40.0;
+        this.ySpeed = Math.random() * 60 + 50.0;
+        this.corners = new Array();
+        this.time = Math.random();
+        var ci = Math.round(Math.random() * (colors.length - 1));
+        this.frontColor = colors[ci][0];
+        this.backColor = colors[ci][1];
+        for (var i = 0; i < 4; i++) {
+            var dx = Math.cos(this.angle + DEG_TO_RAD * (i * 90 + 45));
+            var dy = Math.sin(this.angle + DEG_TO_RAD * (i * 90 + 45));
+            this.corners[i] = new Vector2(dx, dy);
+        }
+        this.Update = function(_dt) {
+            this.time += _dt;
+            this.rotation += this.rotationSpeed * _dt;
+            this.cosA = Math.cos(DEG_TO_RAD * this.rotation);
+            this.pos.x += Math.cos(this.time * this.oscillationSpeed) * this.xSpeed * _dt
+            this.pos.y += this.ySpeed * _dt;
+            if (this.pos.y > ConfettiPaper.bounds.y) {
+                this.pos.x = Math.random() * ConfettiPaper.bounds.x;
+                this.pos.y = 0;
+            }
+        }
+        this.Draw = function(_g) {
+            if (this.cosA > 0) {
+                _g.fillStyle = this.frontColor;
+            } else {
+                _g.fillStyle = this.backColor;
+            }
+            _g.beginPath();
+            _g.moveTo(this.pos.x + this.corners[0].x * this.size, this.pos.y + this.corners[0].y * this.size * this.cosA);
+            for (var i = 1; i < 4; i++) {
+                _g.lineTo(this.pos.x + this.corners[i].x * this.size, this.pos.y + this.corners[i].y * this.size * this.cosA);
+            }
+            _g.closePath();
+            _g.fill();
+        }
+    }
+    ConfettiPaper.bounds = new Vector2(0, 0);
+
+    function ConfettiRibbon(_x, _y, _count, _dist, _thickness, _angle, _mass, _drag) {
+        this.particleDist = _dist;
+        this.particleCount = _count;
+        this.particleMass = _mass;
+        this.particleDrag = _drag;
+        this.particles = new Array();
+        var ci = Math.round(Math.random() * (colors.length - 1));
+        this.frontColor = colors[ci][0];
+        this.backColor = colors[ci][1];
+        this.xOff = Math.cos(DEG_TO_RAD * _angle) * _thickness;
+        this.yOff = Math.sin(DEG_TO_RAD * _angle) * _thickness;
+        this.position = new Vector2(_x, _y);
+        this.prevPosition = new Vector2(_x, _y);
+        this.velocityInherit = Math.random() * 2 + 4;
+        this.time = Math.random() * 100;
+        this.oscillationSpeed = Math.random() * 2 + 2;
+        this.oscillationDistance = Math.random() * 40 + 40;
+        this.ySpeed = Math.random() * 40 + 80;
+        for (var i = 0; i < this.particleCount; i++) {
+            this.particles[i] = new EulerMass(_x, _y - i * this.particleDist, this.particleMass, this.particleDrag);
+        }
+        this.Update = function(_dt) {
+            var i = 0;
+            this.time += _dt * this.oscillationSpeed;
+            this.position.y += this.ySpeed * _dt;
+            this.position.x += Math.cos(this.time) * this.oscillationDistance * _dt;
+            this.particles[0].position = this.position;
+            var dX = this.prevPosition.x - this.position.x;
+            var dY = this.prevPosition.y - this.position.y;
+            var delta = Math.sqrt(dX * dX + dY * dY);
+            this.prevPosition = new Vector2(this.position.x, this.position.y);
+            for (i = 1; i < this.particleCount; i++) {
+                var dirP = Vector2.Sub(this.particles[i - 1].position, this.particles[i].position);
+                dirP.Normalize();
+                dirP.Mul((delta / _dt) * this.velocityInherit);
+                this.particles[i].AddForce(dirP);
+            }
+            for (i = 1; i < this.particleCount; i++) {
+                this.particles[i].Integrate(_dt);
+            }
+            for (i = 1; i < this.particleCount; i++) {
+                var rp2 = new Vector2(this.particles[i].position.x, this.particles[i].position.y);
+                rp2.Sub(this.particles[i - 1].position);
+                rp2.Normalize();
+                rp2.Mul(this.particleDist);
+                rp2.Add(this.particles[i - 1].position);
+                this.particles[i].position = rp2;
+            }
+            if (this.position.y > ConfettiRibbon.bounds.y + this.particleDist * this.particleCount) {
+                this.Reset();
+            }
+        }
+        this.Reset = function() {
+            this.position.y = -Math.random() * ConfettiRibbon.bounds.y;
+            this.position.x = Math.random() * ConfettiRibbon.bounds.x;
+            this.prevPosition = new Vector2(this.position.x, this.position.y);
+            this.velocityInherit = Math.random() * 2 + 4;
+            this.time = Math.random() * 100;
+            this.oscillationSpeed = Math.random() * 2.0 + 1.5;
+            this.oscillationDistance = Math.random() * 40 + 40;
+            this.ySpeed = Math.random() * 40 + 80;
+            var ci = Math.round(Math.random() * (colors.length - 1));
+            this.frontColor = colors[ci][0];
+            this.backColor = colors[ci][1];
+            this.particles = new Array();
+            for (var i = 0; i < this.particleCount; i++) {
+                this.particles[i] = new EulerMass(this.position.x, this.position.y - i * this.particleDist, this.particleMass, this.particleDrag);
+            }
+        }
+        this.Draw = function(_g) {
+            for (var i = 0; i < this.particleCount - 1; i++) {
+                var p0 = new Vector2(this.particles[i].position.x + this.xOff, this.particles[i].position.y + this.yOff);
+                var p1 = new Vector2(this.particles[i + 1].position.x + this.xOff, this.particles[i + 1].position.y + this.yOff);
+                if (this.Side(this.particles[i].position.x, this.particles[i].position.y, this.particles[i + 1].position.x, this.particles[i + 1].position.y, p1.x, p1.y) < 0) {
+                    _g.fillStyle = this.frontColor;
+                    _g.strokeStyle = this.frontColor;
+                } else {
+                    _g.fillStyle = this.backColor;
+                    _g.strokeStyle = this.backColor;
+                }
+                if (i == 0) {
+                    _g.beginPath();
+                    _g.moveTo(this.particles[i].position.x, this.particles[i].position.y);
+                    _g.lineTo(this.particles[i + 1].position.x, this.particles[i + 1].position.y);
+                    _g.lineTo((this.particles[i + 1].position.x + p1.x) * 0.5, (this.particles[i + 1].position.y + p1.y) * 0.5);
+                    _g.closePath();
+                    _g.stroke();
+                    _g.fill();
+                    _g.beginPath();
+                    _g.moveTo(p1.x, p1.y);
+                    _g.lineTo(p0.x, p0.y);
+                    _g.lineTo((this.particles[i + 1].position.x + p1.x) * 0.5, (this.particles[i + 1].position.y + p1.y) * 0.5);
+                    _g.closePath();
+                    _g.stroke();
+                    _g.fill();
+                } else if (i == this.particleCount - 2) {
+                    _g.beginPath();
+                    _g.moveTo(this.particles[i].position.x, this.particles[i].position.y);
+                    _g.lineTo(this.particles[i + 1].position.x, this.particles[i + 1].position.y);
+                    _g.lineTo((this.particles[i].position.x + p0.x) * 0.5, (this.particles[i].position.y + p0.y) * 0.5);
+                    _g.closePath();
+                    _g.stroke();
+                    _g.fill();
+                    _g.beginPath();
+                    _g.moveTo(p1.x, p1.y);
+                    _g.lineTo(p0.x, p0.y);
+                    _g.lineTo((this.particles[i].position.x + p0.x) * 0.5, (this.particles[i].position.y + p0.y) * 0.5);
+                    _g.closePath();
+                    _g.stroke();
+                    _g.fill();
+                } else {
+                    _g.beginPath();
+                    _g.moveTo(this.particles[i].position.x, this.particles[i].position.y);
+                    _g.lineTo(this.particles[i + 1].position.x, this.particles[i + 1].position.y);
+                    _g.lineTo(p1.x, p1.y);
+                    _g.lineTo(p0.x, p0.y);
+                    _g.closePath();
+                    _g.stroke();
+                    _g.fill();
+                }
+            }
+        }
+        this.Side = function(x1, y1, x2, y2, x3, y3) {
+            return ((x1 - x2) * (y3 - y2) - (y1 - y2) * (x3 - x2));
+        }
+    }
+    ConfettiRibbon.bounds = new Vector2(0, 0);
+    confetti = {};
+    confetti.Context = function(parent) {
+        var i = 0;
+        var canvasParent = document.getElementById(parent);
+        var canvas = document.createElement('canvas');
+        canvas.width = canvasParent.offsetWidth;
+        canvas.height = canvasParent.offsetHeight;
+        canvasParent.appendChild(canvas);
+        var context = canvas.getContext('2d');
+        var interval = null;
+        var confettiRibbonCount = 7;
+        var rpCount = 30;
+        var rpDist = 8.0;
+        var rpThick = 8.0;
+        var confettiRibbons = new Array();
+        ConfettiRibbon.bounds = new Vector2(canvas.width, canvas.height);
+        for (i = 0; i < confettiRibbonCount; i++) {
+            confettiRibbons[i] = new ConfettiRibbon(Math.random() * canvas.width, -Math.random() * canvas.height * 2, rpCount, rpDist, rpThick, 45, 1, 0.05);
+        }
+        var confettiPaperCount = 25;
+        var confettiPapers = new Array();
+        ConfettiPaper.bounds = new Vector2(canvas.width, canvas.height);
+        for (i = 0; i < confettiPaperCount; i++) {
+            confettiPapers[i] = new ConfettiPaper(Math.random() * canvas.width, Math.random() * canvas.height);
+        }
+        this.resize = function() {
+            canvas.width = canvasParent.offsetWidth;
+            canvas.height = canvasParent.offsetHeight;
+            ConfettiPaper.bounds = new Vector2(canvas.width, canvas.height);
+            ConfettiRibbon.bounds = new Vector2(canvas.width, canvas.height);
+        }
+        this.start = function() {
+            this.stop()
+            var context = this
+            this.interval = setInterval(function() {
+                confetti.update();
+            }, 1000.0 / frameRate)
+        }
+        this.stop = function() {
+            clearInterval(this.interval);
+        }
+        this.update = function() {
+            var i = 0;
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            for (i = 0; i < confettiPaperCount; i++) {
+                confettiPapers[i].Update(dt);
+                confettiPapers[i].Draw(context);
+            }
+            for (i = 0; i < confettiRibbonCount; i++) {
+                confettiRibbons[i].Update(dt);
+                confettiRibbons[i].Draw(context);
+            }
+        }
+    }
+    var confetti = new confetti.Context('confetti');
+    confetti.start();
+    $(window).resize(function() {
+        confetti.resize();
+    });
+});
+	</script>
+	</body>
+</html>

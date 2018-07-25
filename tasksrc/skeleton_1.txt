@@ -1,0 +1,12 @@
+object Task1 {
+  case class Branch(length: Int, child: MyMobile)
+
+  abstract class MyMobile
+  case class SimpleMobile(weight: Int)
+  case class ComplexMobile(left: Branch, right: Branch)
+
+  def balanced(mobile: MyMobile) : Boolean = {
+    //TODO: implement this function
+    true
+  }
+}

@@ -160,7 +160,7 @@
 
 	function onCodeMirrorChange(editor) {
 		if (editor.getOption('blastCode') === true || editor.getOption('blastCode').shake === undefined) {
-			//throttledShake(editor, 0.3);
+			throttledShake(editor, 0.3);
 		}
 		throttledSpawnParticles(editor);
 	}

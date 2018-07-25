@@ -22,6 +22,7 @@
 							 <a href="javascript:void(0)" class="dropbtn">My Account</a>
 							 <div id="accountdropdown" class="dropdown-content">
 								<!--dropdown content here-->
+							<li><a id="mytasks" href="signin.html">My Tasks</a></li>
 							 </div>
 						  </li>
 					   </ul>
@@ -88,10 +89,12 @@
 				function getDropDownContents() {
 					var myAccount = document.createElement("div");
 					myAccount.innerHTML="";
+					console.log("function");
 					var ajax=new XMLHttpRequest();
 					ajax.open("GET", 'http://52.231.65.108:8080/isloggedin', true);
 					ajax.send(null);
 					ajax.onreadystatechange = function(){
+						console.log("response from server");
 						var resultJSON = ajax.response;
 						var result_obj = JSON.parse(resultJSON);
 						var check = result_obj.isloggedin;
@@ -100,12 +103,14 @@
 						  document.getElementById("accountdropdown").appendChild(myAccount);
 						  document.getElementById("myprojects").href="projectpage.html";
 						  document.getElementById("myscalaeditor").href="projectpage.html";
+						  document.getElementById("mytasks").href="taskpage.html";
 						}
 						else{
 					 		myAccount.innerHTML = "<a href=\"signin.html\">Sign In</a><a href=\"signup.html\">Sign Up</a>"
 							document.getElementById("accountdropdown").appendChild(myAccount);
 					 		document.getElementById("myprojects").href="signin.html";
 					 		document.getElementById("myscalaeditor").href="signin.html";
+					 		document.getElementById("mytasks").href="signin.html";
 						}
 					}
 				}

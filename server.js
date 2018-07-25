@@ -14,7 +14,8 @@ let Scalafile;
 const userSchema = new Schema({
   user_id: String,
   pw: String,
-  projectnames: [String]
+  projectnames: [String],
+  shared: [{username:String, projectname:String, filename:String}]
 });
 User = mongoose.model('User', userSchema);
 
@@ -24,10 +25,16 @@ const scalafileSchema = new Schema({
   classname: String,
   code: String,
   srcfile: Buffer,
-  classfile: Buffer,
-  classfile2: Buffer
+  classfiles: [{title: String, data: Buffer}]
 });
 Scalafile = mongoose.model('Scalafile', scalafileSchema);
+
+const taskfileSchema = new Schema({
+  user_id: String,
+  tasknum: String,
+  code: String
+});
+Taskfile = mongoose.model('Taskfile', taskfileSchema);
 
 const db = mongoose.connection;
 db.on('error',console.error);
@@ -55,7 +62,7 @@ app.get('/', (req, res) => {
 require('./routes/sign_server.js')(app, User, Scalafile);
 require('./routes/projectpage_server.js')(app, User, Scalafile);
 require('./routes/filepage_server.js')(app, User, Scalafile);
-require('./routes/code_manager_server2.js')(app, User, Scalafile);
+require('./routes/code_manager_server2.js')(app, User, Scalafile, Taskfile);
 
 http.listen(8080, () => {
   console.log('Server running at 52.231.65.108:8080');

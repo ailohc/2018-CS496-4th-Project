@@ -33,6 +33,11 @@ body {
 	line-height: 1;
 }
 
+canvas {
+  width:100%;
+  height:100%;
+}
+
 ol, ul {
 	list-style: none;
 }
@@ -262,6 +267,16 @@ input, select, textarea {
 		letter-spacing: 0.25em;
 		line-height: 1.65;
 		margin: 0 0 1em 0;
+	}
+
+	h12 {
+		color: #3c3b3b;
+		font-family: "Raleway", Helvetica, sans-serif;
+		font-weight: 400;
+		letter-spacing: 0.25em;
+		line-height: 1.65;
+		margin: 0 0 1em 0;
+		font-size: 0.8em;
 	}
 
 		h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
@@ -2858,6 +2873,18 @@ input, select, textarea {
 		  color: #fff;
 		  font-family: "Raleway",sans-serif;
 		}
+
+/* Task Page */
+
+#confetti{
+	height: 100%;
+	left: 0px;
+	position: fixed;
+	top: 0px;
+	width: 100%;
+	z-index: -1;
+}
+
 
 /* Post */
 

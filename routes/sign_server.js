@@ -28,7 +28,7 @@ module.exports = (app, User, Scalafile) => {
 
     
     app.post('/signup', (req, res) => {
-        User.find({id: req.body.id}, (err, users) => {
+        User.find({user_id: req.body.id}, (err, users) => {
             if (err) {
                 console.log("user.findone err");
                 console.log(err);
@@ -56,4 +56,23 @@ module.exports = (app, User, Scalafile) => {
             }
         });
     });
+
+    app.get('/isloggedin', (req, res) => { //check if logged in
+        var id = req.session.user_id;
+        if (id == null) {
+            var loggedin = false;
+        } else {
+            var loggedin = true;
+        }
+        res.json({isloggedin:loggedin});
+    });
+
+    app.get('/log-out', (req, res) => { //logout
+        req.session.destroy();
+    });
+
+    app.get('/home', (req, res) => { //render home page
+        res.render("login.html");
+    });
+
 }

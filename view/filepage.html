@@ -66,12 +66,14 @@
 						<h1><a onclick="go_to_homepage();">Scala Editor</a></h1>
 						<nav class="links">
 						   <ul>
+						   		<li><a id="myprojects" href="projectpage.html">My Projects</a></li>
 								<li class="dropdown">
 										<a href="javascript:void(0)" class="dropbtn">My Account</a>
 										<div class="dropdown-content">
 										   <a onclick="logout();">Log Out</a>
 										   </div>
 									 </li>
+									 <li><a id="mytasks" href="taskpage.html">My Tasks</a></li>
 						   </ul>
 						</nav>
 						<nav class="main">
@@ -174,7 +176,7 @@
 									tabSize: 4,
 									indentUnit: 4,
 									indentWithTabs: true,
-									blastCode: {option : 1},
+									//blastCode: {option : 1},
 									onCursorActivity: function() {
     									editor.matchHighlight("CodeMirror-matchhighlight");
 									  },
@@ -383,7 +385,11 @@
 												var compileresultJSON = xhr_compile.response; 
 												compileresult_obj = JSON.parse(compileresultJSON);
 												console.log(compileresultJSON);
+<<<<<<< HEAD
+												if (compileresult_obj.success == 2){
+=======
 												if (compileresult_obj.success == true){
+>>>>>>> 508e9bab2fde926c4ebf77a047756bca24bb5419
 													swal("Compile Success!");
 													document.getElementById("google").value = "";
 													document.getElementById("stackoverflow").value = "";
