@@ -36,6 +36,8 @@
 			<script type="text/javascript" src="https://fastcdn.org/FileSaver.js/1.1.20151003/FileSaver.js" ></script>
 			<script src="https://code.haiku.ai/scripts/core/HaikuCore.3.2.16.min.js"></script>
 			<script src="https://cdn.haiku.ai/e28364e7-e882-4230-a504-d245344d06b4/dcb6f00a4a46e8561c2c37771aa7dd84584bf4b9/index.embed.js"></script>
+			<!--confetti-->
+			<script type="text/javascript" src="https://code.jquery.com/jquery-1.11.0.js"></script>
 			<style type="text/css">
 			.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black; }
 			@media screen and (min-width: 1300px) {
@@ -92,12 +94,12 @@
 										<ul class="links" id="filelinks">
 											<a onclick= 'link_click(this);' id="Task1"><h3>Task 1</h3></a>
 											<a onclick= 'link_click(this);' id="Task2"><h3>Task 2</h3></a>
+											<a onclick= 'link_click(this);' id="Task3"><h3>Task 3</h3></a>
 										</ul>
 									</section>
 									<section>
 										<ul class="actions stacked">
-											<!--<li><a class="button large fit" onclick="make_new_file();">new file</a></li>
-											<li><a class="button large fit" onclick="docs();">?</a></li>-->
+											<li><a class="button large fit" onclick="docs();">?</a></li>
 										</ul>
 									</section>
 		
@@ -109,11 +111,13 @@
 
 						<h12><p id="taskdescription"></p></h12>
 
-						<div id="successplaceholder"></div>
+						<div id="confetti"></div>
 
 						<div id="catplaceholder"></div>
 
 						<div id="codedisplay">
+
+						<div id="loading6" class="loading6"></div>
 
 						<form name = "code_form"><textarea id="code_text">
 							</textarea></form>
@@ -125,9 +129,12 @@
 							<button type="button" onclick="submit_task();">Submit</button>
 							<button type="button" onclick="reset_task();">Reset</button>
 							<h5>StdOut</h5>
-							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form>
+							<form name = "result_form"><textarea rows = "5" id="result_text" name ="result_text"></textarea></form></p>
 
-						</div>
+							<audio id="tinkle">
+								<source src="src/tinkle.mp3" type="audio/mpeg"></audio>
+
+					</div>
 
 							  <script>
 								var user = "";
@@ -135,6 +142,7 @@
 								var taskselected = false;
 
 								function whenLoaded() {
+									document.getElementById("confetti").style.visibility = "hidden";
 									if (taskselected) {
 										document.getElementById("codedisplay").style.visibility = "visible";
 										document.getElementById("catplaceholder").innerHTML="";
@@ -148,6 +156,7 @@
 
 								var task1description = "Task1 Description Here";
 								var task2description = "Implement a calculator for Expressions. It should contain 4 basic arithmetic operations (Sum, Sub, Mult, Div).\nFor instance, x+1 is represented by expression Sum(Var(\“x\”)+Const(1)). If the value of variable x is 3, evaluating the expression should give 4.\nDo not change other parts except the one marked as ‘TODO’.";
+								var task3description = "Task3 Description Here";
 
 									//for rendering - go back to the filepage
 									function go_to_homepage() {
@@ -214,6 +223,8 @@
 										document.getElementById("taskdescription").innerText = task1description;
 									} else if (tasknum == 2) {
 										document.getElementById("taskdescription").innerText = task2description;
+									} else if (tasknum == 3) {
+										document.getElementById("taskdescription").innerText = task3description;
 									}
 									var fileJSON = {"tasknum" : tasknum};
 									var filestring = JSON.stringify(fileJSON);
@@ -237,6 +248,10 @@
 										}
 									}
 								}
+
+								function docs() {
+										swal("F6: Object + Main form \n F11: Enable Full Screen \n Esc: Disable Full Screen \n Ctrl+F: Search \n Ctrl+Space: AutoComplete \n Download: Save Code to your Local Computer \n Save or Ctrl+S: Save Code to Server \n Compile: Compile Your Code \n Run: Run Your Code");
+									}
 								
 								function codingcat() {
 									var component = HaikuComponentEmbed_nflores823_TypingCat(
@@ -244,16 +259,6 @@
 									  {loop: true}
 									);
 									var timeline = component.getDefaultTimeline();
-								  }
-
-								  function successcat() {
-								  	var svgContainer = document.getElementById('svgContainer');
-									bodymovin.loadAnimation({
-									  wrapper: svgContainer,
-									  animType: 'svg',
-									  loop: true,
-									  animationData: JSON.parse(animationData)
-									});
 								  }
 
 								//send code to server for saving
@@ -289,6 +294,8 @@
 
 									//send code to server for compiling
 									function run_to_server() {
+										document.getElementById("loading6").style.display = "flex";
+
 										document.result_form.result_text.value = "";
 										var codestring = editor.getValue();
 										var taskname = document.getElementById("taskname").innerText;
@@ -305,6 +312,7 @@
 										xhr.send(codestring);
 										xhr.onreadystatechange = function() {
 											if (xhr.readyState == XMLHttpRequest.DONE) {
+												document.getElementById("loading6").style.display = "none";
 												var resultJSON = xhr.response; 
 												console.log(resultJSON);
 												result_obj = JSON.parse(resultJSON);
@@ -325,10 +333,6 @@
 										}	
 									}
 
-									function docs() {
-										swal("aaaa");
-									}
-
 									function save_to_local () {
 										var local_code_name = document.getElementById("taskname").innerText;
 										var content = editor.getValue();
@@ -340,6 +344,8 @@
 									}
 
 									function submit_task() {
+										document.getElementById("loading6").style.display = "flex";
+
 										document.result_form.result_text.value = "";
 										var codestring = editor.getValue();
 										var taskname = document.getElementById("taskname").innerText;
@@ -356,7 +362,7 @@
 										xhr.send(codestring);
 										xhr.onreadystatechange = function() {
 											if (xhr.readyState == XMLHttpRequest.DONE) {
-												document.getElementById("successplaceholder").innerHTML = "";
+												document.getElementById("loading6").style.display = "none";
 												var resultJSON = xhr.response; 
 												console.log(resultJSON);
 												result_obj = JSON.parse(resultJSON);
@@ -367,18 +373,26 @@
 													swal("Failed to Compile OR Runtime Error Occured!");
 												}
 												else {
-													if (result_obj.testpass == 5) {
+													if (result_obj.testpass.trim() == 5) {
 														var resultString = "Congratulations! You passed all testcases!";
-														document.getElementById("successplaceholder").innerHTML = "<div id=\"svgContainer\" style=\"width:100%;height:100%;background-color:#000;display:inline-block\"></div>";
-														successcat();
+														document.getElementById("confetti").style.visibility = "visible";
+														setTimeout(removeConfetti, 5000);
+														document.getElementById("tinkle").play();
+													} else if (result_obj.testpass.trim() == "") {
+														var resultString = "Please save before submitting!"
 													} else {
-														var resultString = "You passed "+result_obj.testpass.toString()+" out of 5 testcases!";
+														var resultString = "You passed "+result_obj.testpass.trim()+" out of 5 testcases!";
 													}
 													swal(resultString);
+													console.log(resultString);
 													document.result_form.result_text.value = resultString;
 												}
 											}
 										}	
+									}
+
+									function removeConfetti() {
+										document.getElementById("confetti").style.visibility = "hidden";
 									}
 
 									function reset_task() {
@@ -387,8 +401,10 @@
 										var skeletonCode = "";
 										if (tasknum == 1) {
 											skeletonCode = "object Task1 {\n\tcase class Branch(length: Int, child: MyMobile)\n\n\tabstract class MyMobile\n\tcase class SimpleMobile(weight: Int)\n\tcase class ComplexMobile(left: Branch, right: Branch)\n\n\tdef balanced(mobile: MyMobile) : Boolean = {\n\t\t//TODO: implement this function\n\t\ttrue\n\t}\n}";
-										} else if ( tasknum == 2) {
+										} else if (tasknum == 2) {
 											skeletonCode = "case class CustomException(s: String)  extends Exception(s)\n\nabstract class Expr\n\ncase class Var(v: String) extends Expr\ncase class Const(n: Int) extends Expr\ncase class Sum(a: Expr, b: Expr) extends Expr\ncase class Sub(a: Expr, b: Expr) extends Expr\ncase class Mul(a: Expr, b: Expr) extends Expr\ncase class Div(a: Expr, b: Expr) extends Expr\n\nobject Task2 {\n\ntype Env = String => Int\n\ndef eval (exp: Expr, env: Env): Int = {\n\t//TODO: implement this function\n\t0 //modify this\n\t}\n}";
+										} else if (tasknum == 3) {
+											skeletonCode = "";
 										}
 										editor.setValue(skeletonCode);
 										document.result_form.result_text.value = "";

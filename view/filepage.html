@@ -106,9 +106,10 @@
 							</textarea></form>
 
 							<p>
-									<button type="button" onclick="save_to_local();">Download</button>
-								<button type="button" onclick="save_to_server();">Save</button>
-							<button type="button" onclick="compile_one_to_server();">Compile</button>
+							<button type="button" onclick="save_to_local();">Download</button>
+							<button type="button" onclick="save_to_server();">Save</button>
+							<button type="button" onclick="compile_one_to_server();">Compile One</button>
+							<button type="button" onclick="compile_all_to_server();">Compile All</button>
 							<button type="button" onclick="run_to_server();">Run</button>
 							<h5>StdIn</h5>
 							<form class = "inputform" name = "std_inform"><textarea rows="2" id="std_in" name = "std_in"></textarea></form></p>
@@ -221,7 +222,7 @@
 									Array.from(refresharray, child => {
 										var refresh_li = document.createElement("li");
 										var refresh_text = document.createTextNode(child);
-										refresh_li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3>";
+										refresh_li.innerHTML = "<a onclick='link_click(this);' id="+child+">"+"<h3>"+child+"</h3></a><a onclick='delete_item(this);' id="+child+">X</a>";
 										document.getElementById("filelinks").appendChild(refresh_li);
 									});
 									
@@ -260,27 +261,40 @@
 									console.log(delete_one);
 									var deleteJSON = {"projectname": project_name, "filename" : delete_one};
 									var deletestring = JSON.stringify(deleteJSON);
-									console.log(deleteJSON);
-									var xhr_delete = new XMLHttpRequest();
-									xhr_delete.open("POST", 'http://52.231.65.108:8080/file-delete', true);
-									xhr_delete.setRequestHeader('Access-Control-Allow-Origin', '*');
-									xhr_delete.setRequestHeader("Access-Control-Allow-Credentials", "true");
-									xhr_delete.setRequestHeader("Content-Type", "application/json");
-									xhr_delete.send(deletestring);
-									xhr_delete.onreadystatechange = function() {
+									swal({
+									title: "Are you sure?",
+									text: "Once you delete this code, you need to recompile all of your files!",
+									icon: "warning",
+									buttons: true,
+									dangerMode: true,
+									})
+									.then((willDelete) => {
+									if (willDelete) {
+										console.log(deleteJSON);
+										var xhr_delete = new XMLHttpRequest();
+										xhr_delete.open("POST", 'http://52.231.65.108:8080/file-delete', true);
+										xhr_delete.setRequestHeader('Access-Control-Allow-Origin', '*');
+										xhr_delete.setRequestHeader("Access-Control-Allow-Credentials", "true");
+										xhr_delete.setRequestHeader("Content-Type", "application/json");
+										xhr_delete.send(deletestring);
+										xhr_delete.onreadystatechange = function() {
 										if (xhr_delete.readyState == XMLHttpRequest.DONE) {
 											var delete_JSON = xhr_delete.response;
 											delete_result_obj = JSON.parse(delete_JSON);
 											if (delete_result_obj.success) {
-												swal("Success!");
-												window.location.reload(true);
+												swal("Deleted Successfully!");
+												window.location.reload(true); 
 											}
 											else {
 												swal("Failed to Delete from Server!");
+												}
 											}
 										}
+									} 
+									else {
+										swal("Your file is safe!");
 									}
-
+									});
 								}
 
 						
@@ -303,7 +317,7 @@
 											save_code_to_server(savecode, value);
 											}
 											else {
-												swal('Duplicate file name exists!');
+												swalswal('Duplicate file name exists!');
 											}
 										})
 								} else {
@@ -404,10 +418,43 @@
 
 								}
 
+								function compile_all_to_server() {
+									document.result_form.result_text.value = "";
+									swal ("Only Saved Codes Can be Compiled All. Please Confirm.")
+									var compileallcodeJSON = {"projectname" : project_name};
+									var compileallcodestring = JSON.stringify(compileallcodeJSON);
+									console.log(compileallcodestring);
+									var xhr_all_compile = new XMLHttpRequest();
+									console.log("aaaaaaaaaaaaaa");
+									xhr_all_compile.open("POST", 'http://52.231.65.108:8080/compile-two', true);
+									xhr_all_compile.setRequestHeader('Access-Control-Allow-Origin', '*');
+									xhr_all_compile.setRequestHeader("Access-Control-Allow-Credentials", "true");
+									xhr_all_compile.setRequestHeader("Content-Type", "application/json");
+									xhr_all_compile.send(compileallcodestring);
+									xhr_all_compile.onreadystatechange = function() {
+										if (xhr_all_compile.readyState == XMLHttpRequest.DONE) {
+										var compileallresultJSON = xhr_all_compile.response;
+										compileallresult_obj = JSON.parse(compileallresultJSON);
+										console.log(compileallresultJSON);
+										if (compileallresult_obj.success) {
+											swal("Compile Success!");
+											//document.result_form.result_text.value = compileallresult_obj.output;
+											//compile_all_array = compileallresult_obj.filelist;
+											//refresh_file_tree(compile_all_array);
+										} else {
+											swal("Compile Failed!");
+											document.result_form.result_text.value = compileallresult_obj.output;
+											document.getElementById("google").value = compileallresult_obj.output;
+											document.getElementById("stackoverflow").value = compileallresult_obj.output;
+											}
+										}
+									}
+								}
 
 								//when the run button is clicked
 								function run_to_server(){
 										document.result_form.result_text.value = "";
+										swal ("Only Compiled Codes Can be Run. Please Confirm.")
 										var std_input = document.std_inform.std_in.value;
 										var codestring = editor.getValue();
 										if (document.getElementById("codename").innerText == "") {
@@ -487,7 +534,7 @@
 									}
 
 									function docs() {
-										swal("aaaa");
+										swal("F6: Object + Main form \n F11: Enable Full Screen \n Esc: Disable Full Screen \n Ctrl+F: Search \n Ctrl+Space: AutoComplete \n Download: Save Code to your Local Computer \n Save or Ctrl+S: Save Code to Server \n Compile: Compile Your Code \n Run: Run Your Code");
 									}
 
 									function save_to_local() {
